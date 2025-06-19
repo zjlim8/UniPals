@@ -1,4 +1,5 @@
-import React from "react";
+import { Asset } from "expo-asset";
+import React, { useEffect } from "react";
 import { Image, Text, View } from "react-native";
 import { PaperProvider, TextInput } from "react-native-paper";
 import CustomTextInput from "../components/CustomTextInput";
@@ -10,14 +11,22 @@ const signup = () => {
   const [confirmPassword, setConfPass] = React.useState("");
   const [showPassword, setShowPass] = React.useState(false);
   const [showConfPassword, setShowConfPass] = React.useState(false);
+
+  useEffect(() => {
+    Asset.loadAsync([require("../assets/images/logoinvis.png")]);
+  }, []);
+
   return (
     <PaperProvider>
       <View className="screen justify-between">
-        <Image
-          source={require("../assets/images/logoinvis.png")}
-          style={{ width: 100, height: 95 }}
-          className="mt-[35] mb-[100] self-center"
-        />
+        <View className="items-center justify-center">
+          <Image
+            source={require("../assets/images/logoinvis.png")}
+            style={{ width: 100, height: 95 }}
+            className="mt-[35] mb-[100]"
+            resizeMode="contain"
+          />
+        </View>
         <View className="flex-1 gap-2">
           <Text className="headtext mb-2">Create your account</Text>
           <CustomTextInput

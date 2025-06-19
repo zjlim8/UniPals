@@ -1,5 +1,6 @@
 import DefaultButton from "@/components/DefaultButton";
-import React, { useRef, useState } from "react";
+import { Asset } from "expo-asset";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Image,
   Keyboard,
@@ -23,6 +24,10 @@ const verification = () => {
     }
   };
 
+  useEffect(() => {
+    Asset.loadAsync([require("../assets/images/logoinvis.png")]);
+  }, []);
+
   return (
     <TouchableWithoutFeedback
       onPress={() => {
@@ -31,11 +36,13 @@ const verification = () => {
     >
       <View className="screen justify-between">
         <View>
-          <Image
-            source={require("../assets/images/logoinvis.png")}
-            style={{ width: 100, height: 95 }}
-            className="mt-[35] mb-[100] self-center"
-          />
+          <View className="items-center justify-center">
+            <Image
+              source={require("../assets/images/logoinvis.png")}
+              style={{ width: 100, height: 95 }}
+              className="mt-[35] mb-[100] self-center"
+            />
+          </View>
           <Text className="headtext text-center mb-2">
             Enter Verification Code
           </Text>

@@ -9,11 +9,13 @@ const login = () => {
   return (
     <PaperProvider>
       <View className="screen justify-between">
-        <Image
-          source={require("../assets/images/logoinvis.png")}
-          style={{ width: 100, height: 95 }}
-          className="mt-[35] mb-[100] self-center"
-        />
+        <View className="items-center justify-center">
+          <Image
+            source={require("../assets/images/logoinvis.png")}
+            style={{ width: 100, height: 95 }}
+            className="mt-[35] mb-[100]"
+          />
+        </View>
         <View className="flex-1 gap-2">
           <Text className="headtext mb-2">Log In</Text>
           <CustomTextInput
