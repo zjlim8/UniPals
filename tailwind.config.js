@@ -11,6 +11,7 @@ module.exports = {
         bodytext: "#5C5C5C",
         buttontext: "#FDFDFD",
         linktext: "#7C7C7C",
+        background: "#FDFDFD",
       },
     },
   },
