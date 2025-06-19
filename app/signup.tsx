@@ -6,6 +6,10 @@ import DefaultButton from "../components/DefaultButton";
 
 const signup = () => {
   const [text, setText] = React.useState("");
+  const [password, setPass] = React.useState("");
+  const [confirmPassword, setConfPass] = React.useState("");
+  const [showPassword, setShowPass] = React.useState(false);
+  const [showConfPassword, setShowConfPass] = React.useState(false);
   return (
     <PaperProvider>
       <View className="screen justify-between">
@@ -24,15 +28,31 @@ const signup = () => {
           />
           <CustomTextInput
             label="Password"
-            value={text}
-            onChangeText={(text) => setText(text)}
+            value={password}
+            onChangeText={(password) => setPass(password)}
+            secureTextEntry={!showPassword}
             left={<TextInput.Icon icon="lock" color="#90A4AE" />}
+            right={
+              <TextInput.Icon
+                icon={showPassword ? "eye-off" : "eye"}
+                onPress={() => setShowPass(!showPassword)}
+                color="#90A4AE"
+              />
+            }
           />
           <CustomTextInput
             label="Confirm Password"
-            value={text}
-            onChangeText={(text) => setText(text)}
+            value={confirmPassword}
+            onChangeText={(confirmPassword) => setConfPass(confirmPassword)}
+            secureTextEntry={!showConfPassword}
             left={<TextInput.Icon icon="lock" color="#90A4AE" />}
+            right={
+              <TextInput.Icon
+                icon={showConfPassword ? "eye-off" : "eye"}
+                onPress={() => setShowConfPass(!showConfPassword)}
+                color="#90A4AE"
+              />
+            }
           />
         </View>
         <DefaultButton
