@@ -1,4 +1,5 @@
 import DefaultButton from "@/components/DefaultButton";
+import { images } from "@/constants/images";
 import { Asset } from "expo-asset";
 import React, { useEffect, useRef, useState } from "react";
 import {
@@ -25,7 +26,7 @@ const verification = () => {
   };
 
   useEffect(() => {
-    Asset.loadAsync([require("../assets/images/logoinvis.png")]);
+    Asset.loadAsync([images.logoinvis]);
   }, []);
 
   return (
@@ -38,7 +39,7 @@ const verification = () => {
         <View>
           <View className="items-center justify-center">
             <Image
-              source={require("../assets/images/logoinvis.png")}
+              source={images.logoinvis}
               style={{ width: 100, height: 95 }}
               className="mt-[35] mb-[100] self-center"
             />

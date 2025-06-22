@@ -1,3 +1,4 @@
+import { images } from "@/constants/images";
 import { Asset } from "expo-asset";
 import React, { useEffect } from "react";
 import { Image, Text, View } from "react-native";
@@ -13,7 +14,7 @@ const signup = () => {
   const [showConfPassword, setShowConfPass] = React.useState(false);
 
   useEffect(() => {
-    Asset.loadAsync([require("../assets/images/logoinvis.png")]);
+    Asset.loadAsync([images.logoinvis]);
   }, []);
 
   return (
@@ -21,7 +22,7 @@ const signup = () => {
       <View className="screen justify-between">
         <View className="items-center justify-center">
           <Image
-            source={require("../assets/images/logoinvis.png")}
+            source={images.logoinvis}
             style={{ width: 100, height: 95 }}
             className="mt-[35] mb-[100]"
             resizeMode="contain"

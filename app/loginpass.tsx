@@ -1,3 +1,4 @@
+import { images } from "@/constants/images";
 import React from "react";
 import { Image, View } from "react-native";
 import { PaperProvider, TextInput } from "react-native-paper";
@@ -11,7 +12,7 @@ const loginpass = () => {
       <View className="screen justify-between">
         {/* Change to Profile Picture */}
         <Image
-          source={require("../assets/images/logoinvis.png")}
+          source={images.logoinvis}
           style={{ width: 100, height: 95 }}
           className="mt-[35] mb-[100] self-center"
         />
