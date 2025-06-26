@@ -21,6 +21,8 @@ export default function Index() {
         <Link href="/welcome">Welcome</Link>
         <Link href="/accountsetup">Account Setup</Link>
         <Link href="/interestsetup">Interest Setup</Link>
+        <Link href="/coursesetup">Course Setup</Link>
+        <Link href="/clubsetup">Club Setup</Link>
       </View>
     </PaperProvider>
   );

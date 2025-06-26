@@ -14,6 +14,8 @@ export default function RootLayout() {
         <Stack.Screen name="welcome" options={{ headerShown: false }} />
         <Stack.Screen name="accountsetup" options={{ headerShown: false }} />
         <Stack.Screen name="interestsetup" options={{ headerShown: false }} />
+        <Stack.Screen name="coursesetup" options={{ headerShown: false }} />
+        <Stack.Screen name="clubsetup" options={{ headerShown: false }} />
       </Stack>
     </PaperProvider>
   );

@@ -11,7 +11,7 @@ const OPTIONS = [
 
 const accountsetup = () => {
   const [text, setText] = React.useState("");
-  const [gender, setGender] = React.useState<string>();
+  const [lastName, setLastName] = React.useState("");
 
   return (
     <TouchableWithoutFeedback
@@ -20,33 +20,26 @@ const accountsetup = () => {
       }}
     >
       <View className="screen justify-between">
-        <View>
-          <Text className="headtext mb-2">Tell us more about you!</Text>
+        <View className="gap-2">
+          <Text className="headtext mt-[120]">Tell us more about you!</Text>
           <Text className="text-sm text-bodytext">
             Please enter your details to complete your profile
           </Text>
-        </View>
-        <View className="gap-3">
-          <CustomTextInput
-            label="First Name"
-            value={text}
-            onChangeText={(text) => setText(text)}
-          />
-          <CustomTextInput
-            label="Last Name"
-            value={text}
-            onChangeText={(text) => setText(text)}
-          />
-          <CustomTextInput
-            label="Course"
-            value={text}
-            onChangeText={(text) => setText(text)}
-          />
-          <CustomTextInput
-            label="Semester"
-            value={text}
-            onChangeText={(text) => setText(text)}
-          />
+
+          <View className="gap-3">
+            <View className="mt-[20] gap-1">
+              <CustomTextInput
+                label="First Name"
+                value={text}
+                onChangeText={(text) => setText(text)}
+              />
+              <CustomTextInput
+                label="Last Name"
+                value={lastName}
+                onChangeText={(lastName) => setLastName(lastName)}
+              />
+            </View>
+          </View>
         </View>
         <DefaultButton
           mode="contained"
