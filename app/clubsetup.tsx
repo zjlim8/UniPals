@@ -45,7 +45,7 @@ const clubsetup = () => {
           mode="contained"
           onPress={() => console.log("Pressed")} // function to handle press button
         >
-          Next
+          Done
         </DefaultButton>
       </View>
     </TouchableWithoutFeedback>
