@@ -1,40 +1,55 @@
 import DefaultButton from "@/components/DefaultButton";
 import { images } from "@/constants/images";
 import { Asset } from "expo-asset";
-import React, { useEffect, useRef, useState } from "react";
+import { useRouter } from "expo-router";
+import { reload, signOut } from "firebase/auth";
+import React, { useEffect, useState } from "react";
 import {
+  Alert,
   Image,
   Keyboard,
   Text,
-  TextInput,
-  TouchableOpacity,
   TouchableWithoutFeedback,
   View,
 } from "react-native";
+import { auth } from "../firebase";
 
-const verification = () => {
-  const [code, setCode] = useState(["", "", "", ""]);
-  const inputs = useRef<Array<TextInput | null>>([]);
-
-  const handleChange = (text: string, index: number) => {
-    const newCode = [...code];
-    newCode[index] = text;
-    setCode(newCode);
-    if (text && index < 3) {
-      inputs.current[index + 1]?.focus();
-    }
-  };
+const Verification = () => {
+  const [email, setEmail] = useState<string | null>(null);
+  const [checking, setChecking] = useState(false);
+  const router = useRouter();
 
   useEffect(() => {
     Asset.loadAsync([images.logoinvis]);
+    if (auth.currentUser?.email) {
+      setEmail(auth.currentUser.email);
+    }
   }, []);
 
+  const handleCheckVerification = async () => {
+    if (!auth.currentUser) return;
+
+    setChecking(true);
+    try {
+      await reload(auth.currentUser);
+      if (auth.currentUser.emailVerified) {
+        await signOut(auth);
+        router.push("/login"); // Redirect to login page
+      } else {
+        Alert.alert(
+          "Not Verified",
+          "Please verify your email before continuing."
+        );
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert("Error", "Something went wrong while checking verification.");
+    }
+    setChecking(false);
+  };
+
   return (
-    <TouchableWithoutFeedback
-      onPress={() => {
-        Keyboard.dismiss();
-      }}
-    >
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View className="screen justify-between">
         <View>
           <View className="items-center justify-center">
@@ -44,43 +59,22 @@ const verification = () => {
               className="mt-[35] mb-[100] self-center"
             />
           </View>
-          <Text className="headtext text-center mb-2">
-            Enter Verification Code
-          </Text>
 
+          <Text className="headtext text-center mb-2">Verify Your Email</Text>
           <Text className="text-sm text-auxiliary text-center mb-6">
-            We have sent the verification code to
-            <Text className="font-semibold text-headingtext"> </Text>
+            We have sent a verification link to{" "}
+            <Text className="font-semibold text-headingtext">{email}</Text>.{" "}
+            Please click the link to activate your account.
           </Text>
 
-          <View className="flex-row justify-center gap-4 mb-4">
-            {code.map((digit, index) => (
-              <TextInput
-                key={index}
-                ref={(ref) => {
-                  inputs.current[index] = ref;
-                }}
-                value={digit}
-                maxLength={1}
-                keyboardType="number-pad"
-                onChangeText={(text) => handleChange(text, index)}
-                className="w-20 h-24 border border-auxiliary rounded-2xl text-center text-2xl"
-              />
-            ))}
-          </View>
-
-          <TouchableOpacity>
-            <Text className="text-sm text-auxiliary text-center">
-              Didn't receive the code?{" "}
-              <Text className="underline text-sm text-headingtext">
-                Resend Code
-              </Text>
-            </Text>
-          </TouchableOpacity>
+          <Text className="text-sm text-center text-auxiliary mb-6">
+            After verifying, tap the button below.
+          </Text>
         </View>
+
         <View>
-          <DefaultButton onPress={() => console.log("Verify Now")}>
-            Verify Now
+          <DefaultButton onPress={handleCheckVerification} loading={checking}>
+            I've Verified My Email
           </DefaultButton>
         </View>
       </View>
@@ -88,4 +82,4 @@ const verification = () => {
   );
 };
 
-export default verification;
+export default Verification;
