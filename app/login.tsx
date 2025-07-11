@@ -1,12 +1,13 @@
 import { images } from "@/constants/images";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
+import { doc, getDoc } from "firebase/firestore";
 import React from "react";
 import { Alert, Image, Text, View } from "react-native";
 import { PaperProvider, TextInput } from "react-native-paper";
 import CustomTextInput from "../components/CustomTextInput";
 import DefaultButton from "../components/DefaultButton";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 
 const login = () => {
   const [studentID, setStudentID] = React.useState("");
@@ -31,7 +32,20 @@ const login = () => {
         Alert.alert("Email not verified", "Please verify before logging in.");
         return;
       }
-      router.push("/accountsetup"); // Redirect to account setup page
+
+      // Check Firestore for first and last name
+      const userDocRef = doc(db, "users", userCredential.user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      if (
+        !userDoc.exists() ||
+        !userDoc.data().firstName ||
+        !userDoc.data().lastName
+      ) {
+        router.push("/accountsetup");
+      } else {
+        router.push("/(navroutes)");
+      }
     } catch (err: any) {
       Alert.alert("Login failed", "Something went wrong.");
     }

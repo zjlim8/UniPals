@@ -1,17 +1,44 @@
 import CustomTextInput from "@/components/CustomTextInput";
 import DefaultButton from "@/components/DefaultButton";
+import { auth, db } from "@/firebase";
+import { router } from "expo-router";
+import { doc, setDoc } from "firebase/firestore";
 import React from "react";
-import { Keyboard, Text, TouchableWithoutFeedback, View } from "react-native";
-
-const OPTIONS = [
-  { label: "Male", value: "male" },
-  { label: "Female", value: "female" },
-  { label: "Other", value: "other" },
-];
+import {
+  Alert,
+  Keyboard,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
 const accountsetup = () => {
   const [text, setText] = React.useState("");
   const [lastName, setLastName] = React.useState("");
+
+  const handleAccountSetup = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert("Error", "No user is logged in.");
+      return;
+    }
+
+    try {
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          firstName: text,
+          lastName: lastName,
+        },
+        { merge: true } // Merge to update existing fields without overwriting the entire document
+      );
+      Alert.alert("Success", "Profile updated!");
+      console.log("Profile updated:");
+      router.replace("/coursesetup"); // Redirect to course setup page
+    } catch (error) {
+      Alert.alert("Error", "Could not save profile.");
+    }
+  };
 
   return (
     <TouchableWithoutFeedback
@@ -43,7 +70,7 @@ const accountsetup = () => {
         </View>
         <DefaultButton
           mode="contained"
-          onPress={() => console.log("Pressed")} // function to handle press button
+          onPress={handleAccountSetup} // function to handle press button
         >
           Next
         </DefaultButton>
