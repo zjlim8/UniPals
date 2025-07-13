@@ -29,13 +29,12 @@ const signup = () => {
     }
 
     try {
-      console.log("Creating account for:", email, password, confirmPassword);
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         email,
         password
       );
-      console.log(userCredential);
+
       Alert.alert("Success", "Account created!");
       await sendEmailVerification(userCredential.user);
       router.push("/verification"); // Redirect user to verification page

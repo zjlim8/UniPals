@@ -1,17 +1,67 @@
 import DefaultButton from "@/components/DefaultButton";
 import DefaultMultiSelect from "@/components/DefaultMultiSelect";
-import React from "react";
-import { Keyboard, Text, TouchableWithoutFeedback, View } from "react-native";
-
-const data = [
-  { label: "Math", value: "math" },
-  { label: "Science", value: "science" },
-  { label: "History", value: "history" },
-  { label: "English", value: "english" },
-];
+import { auth, db } from "@/firebase";
+import { router } from "expo-router";
+import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import React, { useEffect } from "react";
+import {
+  Alert,
+  Keyboard,
+  ScrollView,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
 
 const clubsetup = () => {
-  const [selected, setSelected] = React.useState<string[]>();
+  const [selectedClubs, setSelected] = React.useState<string[]>([]);
+  const [clubs, setClubs] = React.useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchClubs = async () => {
+      try {
+        const querySnapshot = await getDocs(collection(db, "clubs"));
+        const clubList = querySnapshot.docs.map((doc) => ({
+          label: doc.data().name,
+          value: doc.data().code,
+        }));
+        setClubs(clubList);
+      } catch (error) {
+        console.error("Failed to fetch clubs:", error);
+      }
+    };
+
+    fetchClubs();
+  }, []);
+
+  const handleClubSetup = async () => {
+    const user = auth.currentUser;
+    if (!user) {
+      Alert.alert("Error", "No user is logged in.");
+      return;
+    }
+
+    try {
+      if (selectedClubs.length === 0) {
+        Alert.alert("Error", "Please select at least one club.");
+        return;
+      }
+
+      // Setting up clubs for user
+      await setDoc(
+        doc(db, "users", user.uid),
+        {
+          clubs: selectedClubs,
+        },
+        { merge: true }
+      );
+      Alert.alert("Success", "Club setup completed!");
+      router.replace("/(navroutes)"); // Redirect to home
+    } catch (error) {
+      Alert.alert("Error", "Could not set up clubs.");
+      return;
+    }
+  };
 
   return (
     <TouchableWithoutFeedback
@@ -20,7 +70,7 @@ const clubsetup = () => {
       }}
     >
       <View className="screen justify-between">
-        <View className="gap-2">
+        <ScrollView className="gap-2 mb-5">
           <Text className="headtext mt-[120]">Are you in any clubs?</Text>
           <Text className="text-sm text-bodytext">
             Let us know if you are part of any clubs or societies to connect you
@@ -28,22 +78,22 @@ const clubsetup = () => {
           </Text>
           <View className="mt-[20] gap-3">
             <DefaultMultiSelect
-              data={data}
+              data={clubs}
               labelField="label"
               valueField="value"
               placeholder="Select Clubs"
               search
               searchPlaceholder="Search clubs..."
-              value={selected}
+              value={selectedClubs}
               onChange={(item) => {
                 setSelected(item);
               }}
             />
           </View>
-        </View>
+        </ScrollView>
         <DefaultButton
           mode="contained"
-          onPress={() => console.log("Pressed")} // function to handle press button
+          onPress={handleClubSetup} // function to handle press button
         >
           Done
         </DefaultButton>

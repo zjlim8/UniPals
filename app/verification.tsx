@@ -3,6 +3,7 @@ import { images } from "@/constants/images";
 import { Asset } from "expo-asset";
 import { useRouter } from "expo-router";
 import { reload, signOut } from "firebase/auth";
+import { doc, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
@@ -12,7 +13,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { auth } from "../firebase";
+import { auth, db } from "../firebase";
 
 const Verification = () => {
   const [email, setEmail] = useState<string | null>(null);
@@ -33,6 +34,18 @@ const Verification = () => {
     try {
       await reload(auth.currentUser);
       if (auth.currentUser.emailVerified) {
+        const user = auth.currentUser;
+        const email = user.email ?? "";
+        const studentID = email.split("@")[0];
+
+        await setDoc(
+          doc(db, "users", user.uid),
+          {
+            email,
+            studentID,
+          },
+          { merge: true }
+        );
         await signOut(auth);
         router.push("/login"); // Redirect to login page
       } else {

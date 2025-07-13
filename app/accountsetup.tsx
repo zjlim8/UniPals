@@ -33,7 +33,6 @@ const accountsetup = () => {
         { merge: true } // Merge to update existing fields without overwriting the entire document
       );
       Alert.alert("Success", "Profile updated!");
-      console.log("Profile updated:");
       router.replace("/coursesetup"); // Redirect to course setup page
     } catch (error) {
       Alert.alert("Error", "Could not save profile.");
