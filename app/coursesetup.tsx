@@ -69,7 +69,7 @@ const coursesetup = () => {
         { merge: true } // Merge to update existing fields without overwriting the entire document
       );
       Alert.alert("Success", "Course setup completed!");
-      router.replace("/clubsetup"); // Redirect to club setup page
+      router.replace("/interestsetup"); // Redirect to interest setup page
     } catch (error) {
       Alert.alert("Error", "Could not set up course.");
       return;

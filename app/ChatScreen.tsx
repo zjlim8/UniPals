@@ -1,4 +1,14 @@
-import React, { useState } from "react";
+import { useRoute } from "@react-navigation/native";
+import { getAuth } from "firebase/auth";
+import {
+  addDoc,
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  serverTimestamp,
+} from "firebase/firestore";
+import React, { useEffect, useState } from "react";
 import {
   FlatList,
   KeyboardAvoidingView,
@@ -8,49 +18,63 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { db } from "../firebaseConfig"; // Adjust path if needed
 
 export default function ChatScreen() {
-  const [messages, setMessages] = useState([
-    {
-      id: "1",
-      text: "Welcome to University FriendFinder!",
-      sender: "bot",
-    },
-  ]);
+  const [messages, setMessages] = useState([]);
   const [inputText, setInputText] = useState("");
 
-  const sendMessage = () => {
+  const route = useRoute();
+  const { chatId } = route.params;
+  const currentUser = getAuth().currentUser;
+
+  useEffect(() => {
+    const q = query(
+      collection(db, "chats", chatId, "messages"),
+      orderBy("timestamp", "asc")
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const loadedMessages = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setMessages(loadedMessages.reverse()); // For inverted FlatList
+    });
+
+    return () => unsubscribe();
+  }, [chatId]);
+
+  const sendMessage = async () => {
     if (!inputText.trim()) return;
 
-    const newMessage = {
-      id: Date.now().toString(),
+    await addDoc(collection(db, "chats", chatId, "messages"), {
+      senderId: currentUser.uid,
       text: inputText,
-      sender: "me", // You can replace this with user UID
-    };
+      timestamp: serverTimestamp(),
+    });
 
-    setMessages([newMessage, ...messages]);
     setInputText("");
   };
 
-  const renderItem = ({ item }) => (
-    <View
-      style={{
-        alignSelf: item.sender === "me" ? "flex-end" : "flex-start",
-        backgroundColor: item.sender === "me" ? "#DCF8C6" : "#EEE",
-        borderRadius: 10,
-        marginVertical: 4,
-        padding: 10,
-        maxWidth: "75%",
-      }}
-    >
-      <Text>{item.text}</Text>
-    </View>
-  );
+  const renderItem = ({ item }) => {
+    const isMe = item.senderId === currentUser.uid;
+
+    return (
+      <View
+        className={`rounded-xl px-4 py-2 my-1 max-w-[75%] ${
+          isMe ? "bg-green-200 self-end" : "bg-gray-200 self-start"
+        }`}
+      >
+        <Text className="text-base">{item.text}</Text>
+      </View>
+    );
+  };
 
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === "ios" ? "padding" : undefined}
-      style={{ flex: 1, padding: 10, backgroundColor: "white" }}
+      className="flex-1 bg-white px-3"
       keyboardVerticalOffset={80}
     >
       <FlatList
@@ -61,38 +85,18 @@ export default function ChatScreen() {
         contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }}
       />
 
-      <View
-        style={{
-          flexDirection: "row",
-          alignItems: "center",
-          padding: 10,
-          borderTopWidth: 1,
-          borderColor: "#DDD",
-        }}
-      >
+      <View className="flex-row items-center px-3 py-2 border-t border-gray-300">
         <TextInput
-          style={{
-            flex: 1,
-            borderColor: "#CCC",
-            borderWidth: 1,
-            borderRadius: 20,
-            paddingHorizontal: 15,
-            paddingVertical: 8,
-            marginRight: 10,
-          }}
+          className="flex-1 border border-gray-300 rounded-full px-4 py-2 mr-2 text-base"
           placeholder="Type a message"
           value={inputText}
           onChangeText={setInputText}
         />
         <TouchableOpacity
           onPress={sendMessage}
-          style={{
-            backgroundColor: "#6200ee",
-            padding: 10,
-            borderRadius: 20,
-          }}
+          className="bg-indigo-600 rounded-full px-4 py-2"
         >
-          <Text style={{ color: "white" }}>Send</Text>
+          <Text className="text-white text-sm font-medium">Send</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

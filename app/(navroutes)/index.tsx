@@ -6,7 +6,7 @@ import { PaperProvider } from "react-native-paper";
 export default function Index() {
   return (
     <PaperProvider>
-      <View className="flex-1 justify-center items-center gap-10">
+      <View className="flex-1 justify-center items-center gap-5">
         <Image
           source={images.logoinvis}
           style={{ width: 100, height: 95 }}
@@ -22,7 +22,8 @@ export default function Index() {
         <Link href="/accountsetup">Account Setup</Link>
         <Link href="/interestsetup">Interest Setup</Link>
         <Link href="/coursesetup">Course Setup</Link>
-        <Link href="/clubsetup">Club Setup</Link>
+        <Link href="/clubpage">Club Page</Link>
+        <Link href="/chatscreen">Chat Screen</Link>
       </View>
     </PaperProvider>
   );

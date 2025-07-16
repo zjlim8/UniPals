@@ -8,19 +8,24 @@ interface EventCardProps {
   description: string;
 }
 
-export default function EventCard(props: EventCardProps) {
+export default function CustomCard(props: EventCardProps) {
   return (
     <Card
       mode="elevated"
       style={{ backgroundColor: "#FFFFFF", width: "100%" }}
       theme={{ colors: { primary: "#3B82F6" } }}
     >
-      <Card.Cover source={{ uri: props.imageUrl }} />
+      <Card.Cover
+        source={{ uri: props.imageUrl }}
+        resizeMode="cover"
+        style={{ height: 300, width: "100%" }}
+      />
       <Card.Title
         title={props.title}
         titleStyle={{ color: "#323232", fontWeight: "bold" }}
+        titleNumberOfLines={0}
       />
-      <Card.Content style={{ marginTop: -10 }}>
+      <Card.Content style={{ marginTop: 0 }}>
         <Text className="text-bodytext text-justify">{props.description}</Text>
       </Card.Content>
     </Card>

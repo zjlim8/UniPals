@@ -1,4 +1,4 @@
-import EventCard from "@/components/EventCard";
+import CustomCard from "@/components/CustomCard";
 import React from "react";
 import {
   Dimensions,
@@ -95,7 +95,7 @@ const Profile = () => {
         </Text>
         <View className="mx-[15] gap-5">
           {clubs.map((item, index) => (
-            <EventCard
+            <CustomCard
               key={index}
               imageUrl="https://picsum.photos/700"
               title={item}

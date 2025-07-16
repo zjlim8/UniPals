@@ -38,9 +38,9 @@ const _Layout = () => {
         }}
       />
       <Tabs.Screen
-        name="events"
+        name="clubs"
         options={{
-          title: "Events",
+          title: "Clubs",
           headerShown: false,
           tabBarIcon: ({ focused }) => (
             <NavIcons focused={focused} icon={icons.event} />
