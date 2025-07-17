@@ -20,7 +20,7 @@ import {
   View,
 } from "react-native";
 
-export default function inbox() {
+export default function Inbox() {
   const currentUser = getAuth().currentUser;
   const [requests, setRequests] = useState<FriendRequest[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -52,7 +52,6 @@ export default function inbox() {
       const reqSnap = await getDocs(
         collection(db, "friend_requests", currentUser.uid, "from")
       );
-      console.log("HELO OOOO");
       const reqData = [];
       for (const docSnap of reqSnap.docs.slice(0, 5)) {
         const fromUid = docSnap.id;
@@ -124,18 +123,24 @@ export default function inbox() {
   };
 
   const handleDeleteNotification = async (notifId: string) => {
+    if (!currentUser) {
+      Alert.alert("Error", "No user is logged in.");
+      return;
+    }
     await deleteDoc(doc(db, "notifications", currentUser.uid, notifId));
     setNotifications((prev) => prev.filter((n) => n.id !== notifId));
   };
 
-  const renderRequest = ({ item }) => (
+  const renderRequest = ({ item }: { item: FriendRequest }) => (
     <View className="flex-row items-center px-4 py-3 border-b border-gray-200">
       <Image
         source={{ uri: item.avatar }}
         className="w-12 h-12 rounded-full mr-3"
       />
       <View className="flex-1">
-        <Text className="font-semibold text-base">{item.name}</Text>
+        <Text className="font-semibold text-base">
+          {item.firstName} {item.lastName}
+        </Text>
         <Text className="text-gray-500 text-sm">sent you a friend request</Text>
       </View>
       <TouchableOpacity
@@ -147,7 +152,7 @@ export default function inbox() {
     </View>
   );
 
-  const renderNotification = ({ item }) => (
+  const renderNotification = ({ item }: { item: Notification }) => (
     <View className="flex-row items-center px-4 py-3 border-b border-gray-200">
       <Image
         source={{ uri: item.avatar }}

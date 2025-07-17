@@ -11,6 +11,7 @@ import {
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
+  Alert,
   FlatList,
   KeyboardAvoidingView,
   Platform,
@@ -46,6 +47,10 @@ export default function ChatScreen() {
   }, [chatId]);
 
   const sendMessage = async () => {
+    if (!currentUser) {
+      Alert.alert("No user is currently logged in.");
+      return;
+    }
     if (!inputText.trim()) return;
 
     await addDoc(collection(db, "chats", chatId, "messages"), {
@@ -58,6 +63,10 @@ export default function ChatScreen() {
   };
 
   const renderItem = ({ item }) => {
+    if (!currentUser) {
+      Alert.alert("No user is currently logged in.");
+      return;
+    }
     const isMe = item.senderId === currentUser.uid;
 
     return (

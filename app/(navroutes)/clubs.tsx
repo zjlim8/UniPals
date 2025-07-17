@@ -76,6 +76,7 @@ const Clubs = () => {
                 imageUrl={club.image}
                 title={club.name}
                 description={club.description}
+                cardWidth="100%"
               />
             </TouchableOpacity>
           ))}
