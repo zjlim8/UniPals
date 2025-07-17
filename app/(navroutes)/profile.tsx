@@ -1,4 +1,4 @@
-import CustomCard from "@/components/CustomCard";
+import { router } from "expo-router";
 import React from "react";
 import {
   Dimensions,
@@ -6,6 +6,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import { Avatar, Chip } from "react-native-paper";
@@ -18,7 +19,15 @@ const interests = [
   "Calisthenics",
   "MMA",
 ];
-const clubs = ["MMA Club", "Sunway Tech Club"];
+const clubs = [
+  "MMA Club",
+  "Sunway Tech Club",
+  "Technology",
+  "Business",
+  "Marketing",
+  "Calisthenics",
+  "MMA",
+];
 
 const Profile = () => {
   return (
@@ -73,12 +82,23 @@ const Profile = () => {
           ))}
         </View>
 
-        {/* Clubs */}
-        <Text className="text-2xl text-primary font-bold mt-5 mx-[15]">
-          Clubs
-        </Text>
+        {/* "Friends" */}
+        <View className="flex-row justify-between mr-[15]">
+          <Text className="text-2xl text-primary font-bold mt-5 mx-[15]">
+            Your Friends
+          </Text>
+          <TouchableOpacity
+            className="flex self-end mt-5"
+            onPress={() => {
+              router.push("/friends");
+            }}
+          >
+            <Text className="text-primary font-semibold">See all</Text>
+          </TouchableOpacity>
+        </View>
+
         <View className="mx-[15]" style={styles.chipContainer}>
-          {clubs.map((item, index) => (
+          {clubs.slice(0, 5).map((item, index) => (
             <Chip
               key={index}
               style={styles.chip}
@@ -86,21 +106,6 @@ const Profile = () => {
             >
               {item}
             </Chip>
-          ))}
-        </View>
-
-        {/* Events */}
-        <Text className="text-2xl text-primary font-bold mt-5 mb-2 mx-[15]">
-          Events Attending
-        </Text>
-        <View className="mx-[15] gap-5">
-          {clubs.map((item, index) => (
-            <CustomCard
-              key={index}
-              imageUrl="https://picsum.photos/700"
-              title={item}
-              description="Lorem ipsum dolor sit amet, consectetur adipiscing elit."
-            />
           ))}
         </View>
       </View>

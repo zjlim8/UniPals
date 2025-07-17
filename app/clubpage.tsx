@@ -8,7 +8,6 @@ import {
   Image,
   Linking,
   ScrollView,
-  StyleSheet,
   Text,
   TouchableOpacity,
   View,
@@ -71,7 +70,7 @@ const clubpage = () => {
         source={{
           uri: clubImage,
         }}
-        style={{ width: "100%", height: 350 }}
+        className="w-full h-[350]"
         resizeMode="cover"
       />
       <View className="bg-background py-5 flex-1 gap-5 px-[25]">
@@ -129,5 +128,3 @@ const clubpage = () => {
 };
 
 export default clubpage;
-
-const styles = StyleSheet.create({});

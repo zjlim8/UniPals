@@ -1,5 +1,6 @@
 import DefaultButton from "@/components/DefaultButton";
 import { images } from "@/constants/images";
+import { router } from "expo-router";
 import React from "react";
 import { Image, Text, View } from "react-native";
 
@@ -10,12 +11,15 @@ const welcome = () => {
         <Image source={images.welcome} />
         <Text className="headtext text-center">Welcome to UniPals!</Text>
         <Text className="text-sm text-bodytext text-center">
-          Set up your profile and start discovering awesome people around you!
+          You're all done! You can now start connecting with like-minded
+          individuals!
         </Text>
       </View>
       <DefaultButton
         mode="contained"
-        onPress={() => console.log("Profile Setup Pressed")} // function to handle press button
+        onPress={() => {
+          router.replace("/(navroutes)");
+        }} // function to handle press button
       >
         Get Started
       </DefaultButton>

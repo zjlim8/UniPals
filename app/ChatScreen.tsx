@@ -1,3 +1,4 @@
+import { db } from "@/firebase";
 import { useRoute } from "@react-navigation/native";
 import { getAuth } from "firebase/auth";
 import {
@@ -18,7 +19,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { db } from "../firebaseConfig"; // Adjust path if needed
 
 export default function ChatScreen() {
   const [messages, setMessages] = useState([]);
