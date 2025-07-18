@@ -30,23 +30,36 @@ export default function Index() {
   const [currentUser, setCurrentUser] = useState(getAuth().currentUser);
   const [users, setUsers] = useState<User[]>([]);
   const [sentRequests, setSentRequests] = useState<string[]>([]);
+  const [authLoading, setAuthLoading] = useState(true);
 
   useEffect(() => {
     const auth = getAuth();
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
+      setAuthLoading(false);
+
+      if (!user) {
+        console.log("No user logged in, redirecting to login");
+        router.replace("/login");
+      }
     });
     return unsubscribe;
-  }, [currentUser]);
+  }, []);
 
   useEffect(() => {
     console.log("Current User:", currentUser);
-    const fetchUsers = async () => {
-      if (!currentUser) {
-        Alert.alert("Error", "No user is logged in.");
-        router.push("/login");
-        return;
-      }
+    if (!authLoading && currentUser) {
+      console.log("Current User:", currentUser);
+      fetchUsers();
+    }
+  }, [currentUser, authLoading]);
+  const fetchUsers = async () => {
+    if (!currentUser) {
+      console.log("Hi");
+      router.replace("/login");
+      return;
+    }
+    try {
       console.log("Fetching users...");
       const snapshot = await getDocs(collection(db, "users"));
       const list = snapshot.docs
@@ -65,10 +78,11 @@ export default function Index() {
       const filteredList = list.filter((u) => !sentIds.includes(u.id));
       console.log("Filtered Users:", filteredList);
       setUsers(filteredList);
-    };
-
-    fetchUsers();
-  }, [currentUser]);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      Alert.alert("Error", "Failed to fetch users");
+    }
+  };
 
   const sendFriendRequest = async (targetUid: string) => {
     if (!currentUser) return;
@@ -95,32 +109,6 @@ export default function Index() {
 
     return (
       <View className="flex-row items-center px-4 py-3 border-b border-gray-100">
-        {/* <Image
-          source={{
-            uri: item.photoURL || "https://i.pravatar.cc/100?img=8",
-          }}
-          className="w-12 h-12 rounded-full mr-3"
-        />
-        <View className="flex-1">
-          <Text className="font-semibold text-base">
-            {item.firstName} {item.lastName}
-          </Text>
-          <Text className="text-gray-600 text-sm">
-            {item.course || "Unknown course"} —{" "}
-            {item.semester ? `Semester ${item.semester}` : "Semester N/A"}
-          </Text>
-        </View>
-        <TouchableOpacity
-          onPress={() => sendFriendRequest(item.id)}
-          disabled={isRequestSent}
-          className={`px-4 py-1.5 rounded-full ${
-            isRequestSent ? "bg-gray-400" : "bg-indigo-600"
-          }`}
-        >
-          <Text className="text-white text-sm font-medium">
-            {isRequestSent ? "Sent" : "Add Friend"}
-          </Text>
-        </TouchableOpacity> */}
         <CustomCard
           imageUrl={item.photoURL || "https://i.pravatar.cc/100?img=8"}
           title={`${item.firstName} ${item.lastName}`}
@@ -146,6 +134,18 @@ export default function Index() {
     );
   };
 
+  if (authLoading) {
+    return (
+      <View className="flex-1 items-center justify-center">
+        <Text className="text-lg">Loading...</Text>
+      </View>
+    );
+  }
+
+  if (!currentUser) {
+    return null;
+  }
+
   return (
     <>
       <ScrollView className="screen flex-1">
@@ -165,7 +165,7 @@ export default function Index() {
         <Link href="/interestsetup">Interest Setup</Link>
         <Link href="/coursesetup">Course Setup</Link>
         <Link href="/clubpage">Club Page</Link>
-        <Link href="/chatscreen">Chat Screen</Link>
+        <Link href="/ChatScreen">Chat Screen</Link>
         <Text className="text-2xl text-headingtext font-bold align-left">
           Discover People
         </Text>
