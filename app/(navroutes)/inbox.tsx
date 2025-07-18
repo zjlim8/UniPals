@@ -6,8 +6,12 @@ import {
   doc,
   getDoc,
   getDocs,
+  limit,
+  orderBy,
+  query,
   serverTimestamp,
   setDoc,
+  where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
@@ -48,18 +52,31 @@ export default function Inbox() {
     }
 
     const fetchInbox = async () => {
+      if (!currentUser) {
+        Alert.alert("Error", "No user is logged in.");
+        return;
+      }
       // Friend Requests
+      // Query friend requests where current user is the recipient
       const reqSnap = await getDocs(
-        collection(db, "friend_requests", currentUser.uid, "from")
+        query(
+          collection(db, "friend_requests"),
+          where("recipient", "==", currentUser.uid),
+          where("status", "==", "pending"),
+          orderBy("timestamp", "desc"),
+          limit(5)
+        )
       );
+
       const reqData = [];
-      for (const docSnap of reqSnap.docs.slice(0, 5)) {
-        const fromUid = docSnap.id;
-        const userDoc = await getDoc(doc(db, "users", fromUid));
+      for (const docSnap of reqSnap.docs) {
+        const requestData = docSnap.data();
+        const userDoc = await getDoc(doc(db, "users", requestData.sender));
         const user = userDoc.data();
+
         if (user) {
           reqData.push({
-            uid: fromUid,
+            uid: requestData.sender,
             firstName: user.firstName,
             lastName: user.lastName,
             course: user.course || "",
@@ -98,27 +115,52 @@ export default function Inbox() {
   const handleAccept = async (uid: string) => {
     if (!currentUser) return;
     try {
-      const now = serverTimestamp();
-      await setDoc(doc(db, "friends", currentUser.uid, uid), {
-        timestamp: now,
-      });
-      await setDoc(doc(db, "friends", uid, currentUser.uid), {
-        timestamp: now,
+      // Find the friend request document
+      const requestQuery = query(
+        collection(db, "friend_requests"),
+        where("sender", "==", uid),
+        where("recipient", "==", currentUser.uid),
+        where("status", "==", "pending")
+      );
+
+      const requestSnap = await getDocs(requestQuery);
+      if (requestSnap.empty) {
+        Alert.alert("Error", "Friend request not found");
+        return;
+      }
+
+      const requestDoc = requestSnap.docs[0];
+
+      // Update the request status to accepted
+      await setDoc(requestDoc.ref, {
+        ...requestDoc.data(),
+        status: "accepted",
+        acceptedAt: serverTimestamp(),
       });
 
-      await deleteDoc(doc(db, "friend_requests", currentUser.uid, "from", uid));
-
-      await setDoc(doc(db, "notifications", uid, Date.now().toString()), {
-        from: currentUser.uid,
-        type: "friend_accept",
-        timestamp: now,
-        seen: false,
+      // Create friend connections in both directions
+      await setDoc(doc(db, "friends", `${currentUser.uid}_${uid}`), {
+        users: [currentUser.uid, uid],
+        timestamp: serverTimestamp(),
       });
 
-      Alert.alert("Friend request accepted!");
-      setRequests((prev) => prev.filter((u) => u.uid !== uid));
-    } catch (err) {
-      Alert.alert("Error", "Could not accept request.");
+      // Create notification for the sender
+      await setDoc(
+        doc(collection(db, "notifications", uid, "user_notifications")),
+        {
+          type: "friend_accept",
+          from: currentUser.uid,
+          timestamp: serverTimestamp(),
+          seen: false,
+        }
+      );
+
+      // Update local state
+      setRequests((prev) => prev.filter((req) => req.uid !== uid));
+      Alert.alert("Success", "Friend request accepted!");
+    } catch (error) {
+      console.error("Error accepting friend request:", error);
+      Alert.alert("Error", "Failed to accept friend request");
     }
   };
 

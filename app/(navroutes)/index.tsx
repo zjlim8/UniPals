@@ -7,8 +7,10 @@ import {
   collection,
   doc,
   getDocs,
+  query,
   serverTimestamp,
   setDoc,
+  where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
@@ -39,7 +41,6 @@ export default function Index() {
       setAuthLoading(false);
 
       if (!user) {
-        console.log("No user logged in, redirecting to login");
         router.replace("/login");
       }
     });
@@ -47,36 +48,35 @@ export default function Index() {
   }, []);
 
   useEffect(() => {
-    console.log("Current User:", currentUser);
     if (!authLoading && currentUser) {
-      console.log("Current User:", currentUser);
       fetchUsers();
     }
   }, [currentUser, authLoading]);
   const fetchUsers = async () => {
     if (!currentUser) {
-      console.log("Hi");
       router.replace("/login");
       return;
     }
     try {
-      console.log("Fetching users...");
+      // Get all users
       const snapshot = await getDocs(collection(db, "users"));
       const list = snapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }))
         .filter((u) => u.id !== currentUser?.uid);
 
-      console.log("Fetched Users:", list);
-
-      const sentRequestRecord = await getDocs(
-        collection(db, "friend_requests", currentUser.uid, "to")
+      // Get sent friend requests
+      const sentRequestsQuery = query(
+        collection(db, "friend_requests"),
+        where("sender", "==", currentUser.uid),
+        where("status", "==", "pending")
       );
-      console.log("sentRequestRecord.docs", sentRequestRecord.docs);
-      const sentIds = sentRequestRecord.docs.map((doc) => doc.id);
-      console.log("sentids", sentIds);
+      const sentRequestsSnapshot = await getDocs(sentRequestsQuery);
+      const sentIds = sentRequestsSnapshot.docs.map(
+        (doc) => doc.data().recipient
+      );
 
+      // Filter out users who already have pending requests
       const filteredList = list.filter((u) => !sentIds.includes(u.id));
-      console.log("Filtered Users:", filteredList);
       setUsers(filteredList);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -87,15 +87,24 @@ export default function Index() {
   const sendFriendRequest = async (targetUid: string) => {
     if (!currentUser) return;
     try {
-      await setDoc(
-        doc(db, "friend_requests", targetUid, "from", currentUser.uid),
-        {
-          timestamp: serverTimestamp(),
-        }
-      );
+      // Create a new document in the friend_requests collection
+      const requestRef = doc(collection(db, "friend_requests"));
+      await setDoc(requestRef, {
+        sender: currentUser.uid,
+        recipient: targetUid,
+        status: "pending",
+        timestamp: serverTimestamp(),
+      });
 
-      // Add the target user ID to sentRequests state
+      // Update local state to show request as sent
       setSentRequests((prev) => [...prev, targetUid]);
+
+      // await setDoc(doc(db, "notifications", targetUid, Date.now().toString()), {
+      //   type: "friend_request",
+      //   from: currentUser.uid,
+      //   timestamp: serverTimestamp(),
+      //   seen: false,
+      // });
 
       Alert.alert("Friend request sent!");
     } catch (err) {
@@ -165,7 +174,7 @@ export default function Index() {
         <Link href="/interestsetup">Interest Setup</Link>
         <Link href="/coursesetup">Course Setup</Link>
         <Link href="/clubpage">Club Page</Link>
-        <Link href="/ChatScreen">Chat Screen</Link>
+        <Link href="/chatscreen">Chat Screen</Link>
         <Text className="text-2xl text-headingtext font-bold align-left">
           Discover People
         </Text>
