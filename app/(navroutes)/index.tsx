@@ -75,8 +75,21 @@ export default function Index() {
         (doc) => doc.data().recipient
       );
 
-      // Filter out users who already have pending requests
-      const filteredList = list.filter((u) => !sentIds.includes(u.id));
+      // Get existing friends
+      const friendsQuery = query(
+        collection(db, "friends"),
+        where("users", "array-contains", currentUser.uid)
+      );
+      const friendsSnapshot = await getDocs(friendsQuery);
+      const friendIds = friendsSnapshot.docs.map((doc) =>
+        doc.data().users.find((id: string) => id !== currentUser.uid)
+      );
+
+      // Filter out users with pending requests or already friends
+      const filteredList = list.filter(
+        (u) => !sentIds.includes(u.id) && !friendIds.includes(u.id)
+      );
+
       setUsers(filteredList);
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -99,12 +112,15 @@ export default function Index() {
       // Update local state to show request as sent
       setSentRequests((prev) => [...prev, targetUid]);
 
-      // await setDoc(doc(db, "notifications", targetUid, Date.now().toString()), {
-      //   type: "friend_request",
-      //   from: currentUser.uid,
-      //   timestamp: serverTimestamp(),
-      //   seen: false,
-      // });
+      await setDoc(
+        doc(collection(db, "notifications", targetUid, "user_notifications")),
+        {
+          type: "friend_request",
+          from: currentUser.uid,
+          timestamp: serverTimestamp(),
+          seen: false,
+        }
+      );
 
       Alert.alert("Friend request sent!");
     } catch (err) {
@@ -128,8 +144,8 @@ export default function Index() {
             <TouchableOpacity
               onPress={() => sendFriendRequest(item.id)}
               disabled={isRequestSent}
-              className={`mt-3 px-4 py-2 rounded-full ${
-                isRequestSent ? "bg-gray-400" : "bg-indigo-600"
+              className={`mt-3 px-4 py-2 rounded-[10] ${
+                isRequestSent ? "bg-gray-400" : "bg-primary"
               }`}
             >
               <Text className="text-white text-sm font-medium text-center">
@@ -175,6 +191,7 @@ export default function Index() {
         <Link href="/coursesetup">Course Setup</Link>
         <Link href="/clubpage">Club Page</Link>
         <Link href="/chatscreen">Chat Screen</Link>
+        <Link href="/biosetup">Bio</Link>
         <Text className="text-2xl text-headingtext font-bold align-left">
           Discover People
         </Text>

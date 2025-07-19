@@ -1,6 +1,7 @@
 import { icons } from "@/constants/icons";
-import { Tabs } from "expo-router";
-import React from "react";
+import { router, Tabs } from "expo-router";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import React, { useEffect, useState } from "react";
 import { Image } from "react-native";
 
 const NavIcons = ({ focused, icon, title }: any) => {
@@ -17,6 +18,19 @@ const NavIcons = ({ focused, icon, title }: any) => {
 };
 
 const _Layout = () => {
+  const [userId, setUserId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserId(user.uid);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
   return (
     <Tabs
       screenOptions={{
@@ -75,6 +89,19 @@ const _Layout = () => {
           tabBarIcon: ({ focused }) => (
             <NavIcons focused={focused} icon={icons.profile} />
           ),
+        }}
+        listeners={{
+          tabPress: (e) => {
+            // Prevent default behavior
+            e.preventDefault();
+            // Navigate with the current user's ID
+            if (userId) {
+              router.push({
+                pathname: "/(navroutes)/profile",
+                params: { userId },
+              });
+            }
+          },
         }}
       />
     </Tabs>

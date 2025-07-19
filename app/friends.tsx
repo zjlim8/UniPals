@@ -1,8 +1,10 @@
 import { db } from "@/firebase";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { getAuth } from "firebase/auth";
 import {
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -120,22 +122,50 @@ const Friends = () => {
           </Text>
         </View>
       </TouchableOpacity>
-      <TouchableOpacity
-        onPress={() => handleMessage(item.id)}
-        className="bg-primary px-3 py-1 rounded-[15]"
-      >
-        <Text className="text-white text-sm text-center self-center">
-          Message
-        </Text>
-      </TouchableOpacity>
+      <View className="flex-row gap-2">
+        <TouchableOpacity
+          onPress={() => handleMessage(item.id)}
+          className="bg-primary px-3 py-1 rounded-[15]"
+        >
+          <Text className="text-white text-sm text-center self-center">
+            Message
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => handleUnfriend(item.id)}
+          className="bg-red-500 w-8 h-8 rounded-full items-center justify-center"
+        >
+          <MaterialCommunityIcons
+            name="account-remove"
+            size={18}
+            color="white"
+          />
+        </TouchableOpacity>
+      </View>
     </View>
   );
 
+  const handleUnfriend = async (friendId: string) => {
+    if (!currentUser) return;
+
+    try {
+      // Delete the friend connection document
+      const friendDocId = [currentUser.uid, friendId].sort().join("_");
+      await deleteDoc(doc(db, "friends", friendDocId));
+
+      // Update local state
+      setFriends((prev) => prev.filter((friend) => friend.id !== friendId));
+
+      Alert.alert("Success", "Friend removed successfully");
+    } catch (error) {
+      console.error("Error removing friend:", error);
+      Alert.alert("Error", "Failed to remove friend");
+    }
+  };
+
   return (
-    <View className="flex-1 bg-white pt-12">
-      <Text className="text-2xl font-bold px-4 pb-2 text-blue-600">
-        Friends
-      </Text>
+    <View className="flex-1 bg-background pt-[60]">
+      <Text className="text-2xl font-bold px-4 pb-2 text-primary">Friends</Text>
       <FlatList
         data={friends}
         renderItem={renderFriend}

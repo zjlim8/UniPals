@@ -8,6 +8,7 @@ interface EventCardProps {
   description: string;
   button?: React.ReactNode;
   cardWidth?: number | `${number}%` | "auto";
+  cardHeight?: number | `${number}%` | "auto";
 }
 
 export default function CustomCard(props: EventCardProps) {
@@ -23,7 +24,11 @@ export default function CustomCard(props: EventCardProps) {
       <Card.Cover
         source={{ uri: props.imageUrl }}
         resizeMode="cover"
-        style={{ height: 300 }}
+        style={{
+          ...(props.cardHeight !== undefined
+            ? { height: props.cardHeight }
+            : {}),
+        }}
       />
       <Card.Title
         title={props.title}

@@ -89,18 +89,19 @@ export default function Inbox() {
 
       // Notifications
       const notifSnap = await getDocs(
-        collection(db, "notifications", currentUser.uid)
+        collection(db, "notifications", currentUser.uid, "user_notifications")
       );
       const notifData = [];
       for (const notifDoc of notifSnap.docs) {
         const data = notifDoc.data();
+        console.log(data);
         const fromUid = data.from;
         const userDoc = await getDoc(doc(db, "users", fromUid));
         const user = userDoc.data();
         if (user) {
           notifData.push({
             id: notifDoc.id,
-            name: user.fullName,
+            name: `${user.firstName} ${user.lastName}`,
             avatar: user.photoURL || "https://i.pravatar.cc/100?img=5",
             type: data.type,
           });
@@ -216,13 +217,15 @@ export default function Inbox() {
   );
 
   return (
-    <ScrollView className="flex-1 bg-white pt-12 px-4">
-      <Text className="text-2xl font-bold text-blue-600 mb-3">Inbox</Text>
+    <ScrollView className="flex-1 bg-white pt-[60] px-4">
+      <Text className="text-2xl font-bold text-primary mb-3">Inbox</Text>
 
       {/* Friend Requests */}
       <Text className="text-lg font-semibold mb-1">Friend Requests</Text>
       {requests.length === 0 ? (
-        <Text className="text-gray-500 mb-4">No pending friend requests</Text>
+        <Text className="text-bodytext mb-4 mt-1">
+          No pending friend requests
+        </Text>
       ) : (
         <FlatList
           data={requests}
@@ -235,7 +238,7 @@ export default function Inbox() {
       {/* Notifications */}
       <Text className="text-lg font-semibold mt-6 mb-1">Notifications</Text>
       {notifications.length === 0 ? (
-        <Text className="text-gray-500">No new notifications</Text>
+        <Text className="text-bodytext mt-1">No new notifications</Text>
       ) : (
         <FlatList
           data={notifications}
