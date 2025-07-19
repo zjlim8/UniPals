@@ -7,31 +7,6 @@ import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import React, { useEffect } from "react";
 import { Alert, Image, ScrollView, Text, View } from "react-native";
 
-// const interests = [
-//   { label: "Academic & Research", value: "1" },
-//   { label: "Animal Welfare", value: "2" },
-//   { label: "Arts & Performance", value: "3" },
-//   { label: "Automotive & Transportation", value: "4" },
-//   { label: "Business & Finance", value: "5" },
-//   { label: "Community Service", value: "6" },
-//   { label: "Cultural & Heritage", value: "7" },
-//   { label: "Entertainment & Pop Culture", value: "8" },
-//   { label: "Environmental & Sustainability", value: "9" },
-//   { label: "Faith & Spirituality", value: "10" },
-//   { label: "Food & Culinary", value: "11" },
-//   { label: "Games & Recreation", value: "12" },
-//   { label: "Innovation & Entrepreneurship", value: "13" },
-//   { label: "International & Community", value: "14" },
-//   { label: "Language & Communication", value: "15" },
-//   { label: "Leadership & Governance", value: "16" },
-//   { label: "Literature & Reading", value: "17" },
-//   { label: "Martial Arts", value: "18" },
-//   { label: "Media & Communications", value: "19" },
-//   { label: "Social & Networking", value: "20" },
-//   { label: "Social Justice & Advocacy", value: "21" },
-//   { label: "Sports & Recreation", value: "22" },
-// ];
-
 const interestsetup = () => {
   const [interests, setInterests] = React.useState<any[]>([]);
   const [selectedInterests, setSelectedInterests] = React.useState<string[]>(
