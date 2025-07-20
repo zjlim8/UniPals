@@ -1,5 +1,6 @@
 import { db } from "@/firebase";
-import { useRoute } from "@react-navigation/native";
+import Ionicons from "@expo/vector-icons/build/Ionicons";
+import { router, useLocalSearchParams } from "expo-router";
 import { getAuth } from "firebase/auth";
 import {
   addDoc,
@@ -9,10 +10,10 @@ import {
   query,
   serverTimestamp,
 } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
-  Alert,
-  FlatList,
+  ActivityIndicator,
+  Image,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -20,92 +21,148 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
+
+type Message = {
+  id: string;
+  text: string;
+  senderId: string;
+  timestamp: any;
+};
 
 export default function ChatScreen() {
-  const [messages, setMessages] = useState([]);
+  const params = useLocalSearchParams();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState("");
+  const [loading, setLoading] = useState(true);
+  const flatListRef = useRef<FlatList>(null);
 
-  const route = useRoute();
-  const { chatId } = route.params;
   const currentUser = getAuth().currentUser;
+  const chatId = params.chatId as string;
+  const recipient = JSON.parse(params.recipient as string);
 
   useEffect(() => {
+    if (!currentUser || !chatId) return;
+
+    // Subscribe to messages
     const q = query(
       collection(db, "chats", chatId, "messages"),
-      orderBy("timestamp", "asc")
+      orderBy("timestamp", "desc")
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
-      const loadedMessages = snapshot.docs.map((doc) => ({
+      const messageList = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
-      }));
-      setMessages(loadedMessages.reverse()); // For inverted FlatList
+      })) as Message[];
+      setMessages(messageList);
+      setLoading(false);
     });
 
     return () => unsubscribe();
   }, [chatId]);
 
   const sendMessage = async () => {
-    if (!currentUser) {
-      Alert.alert("No user is currently logged in.");
-      return;
+    if (!inputText.trim() || !currentUser || !chatId) return;
+
+    try {
+      await addDoc(collection(db, "chats", chatId, "messages"), {
+        text: inputText.trim(),
+        senderId: currentUser.uid,
+        timestamp: serverTimestamp(),
+      });
+
+      setInputText("");
+    } catch (error) {
+      console.error("Error sending message:", error);
     }
-    if (!inputText.trim()) return;
-
-    await addDoc(collection(db, "chats", chatId, "messages"), {
-      senderId: currentUser.uid,
-      text: inputText,
-      timestamp: serverTimestamp(),
-    });
-
-    setInputText("");
   };
 
-  const renderItem = ({ item }) => {
-    if (!currentUser) {
-      Alert.alert("No user is currently logged in.");
-      return;
-    }
-    const isMe = item.senderId === currentUser.uid;
-
+  if (loading) {
     return (
-      <View
-        className={`rounded-xl px-4 py-2 my-1 max-w-[75%] ${
-          isMe ? "bg-green-200 self-end" : "bg-gray-200 self-start"
-        }`}
-      >
-        <Text className="text-base">{item.text}</Text>
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#3B82F6" />
       </View>
     );
-  };
+  }
 
   return (
     <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      className="flex-1 bg-white px-3"
-      keyboardVerticalOffset={80}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      className="flex-1 bg-white"
+      keyboardVerticalOffset={90}
     >
+      {/* Header */}
+      <View className="flex-row items-center p-4 pt-[60] border-b border-gray-200">
+        <TouchableOpacity onPress={() => router.back()} className="mr-4">
+          <Ionicons name="chevron-back" size={24} color="#3B82F6" />
+        </TouchableOpacity>
+        <Image
+          source={{
+            uri: recipient.photoURL || "https://i.pravatar.cc/100?img=1",
+          }}
+          className="w-10 h-10 rounded-full mr-3"
+        />
+        <Text className="text-lg font-semibold">
+          {recipient.firstName} {recipient.lastName}
+        </Text>
+      </View>
+
+      {/* Messages */}
       <FlatList
+        ref={flatListRef}
         data={messages}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
         inverted
-        contentContainerStyle={{ flexGrow: 1, justifyContent: "flex-end" }}
+        className="flex-1 px-4"
+        renderItem={({ item }) => {
+          const isMine = item.senderId === currentUser?.uid;
+          return (
+            <View
+              className={`flex-row ${
+                isMine ? "justify-end" : "justify-start"
+              } mb-2`}
+            >
+              <View
+                className={`rounded-2xl px-4 py-2 max-w-[80%] ${
+                  isMine ? "bg-primary" : "bg-gray-200"
+                }`}
+              >
+                <Text
+                  className={`text-base ${
+                    isMine ? "text-white" : "text-gray-800"
+                  }`}
+                >
+                  {item.text}
+                </Text>
+              </View>
+            </View>
+          );
+        }}
+        keyExtractor={(item) => item.id}
       />
 
-      <View className="flex-row items-center px-3 py-2 border-t border-gray-300">
+      {/* Input */}
+      <View className="flex-row items-center p-4 pb-[35] border-t border-gray-200">
         <TextInput
-          className="flex-1 border border-gray-300 rounded-full px-4 py-2 mr-2 text-base"
-          placeholder="Type a message"
+          className="flex-1 h-12 bg-gray-100 rounded-full px-4 mr-2"
+          placeholder="Type a message..."
+          placeholderTextColor="#5C5C5C"
           value={inputText}
           onChangeText={setInputText}
+          style={{
+            paddingTop: 12,
+            paddingBottom: 10,
+          }}
+          multiline
         />
         <TouchableOpacity
           onPress={sendMessage}
-          className="bg-indigo-600 rounded-full px-4 py-2"
+          disabled={!inputText.trim()}
+          className={`rounded-full p-2 h-12 items-center justify-center ${
+            inputText.trim() ? "bg-primary" : "bg-gray-300"
+          }`}
         >
-          <Text className="text-white text-sm font-medium">Send</Text>
+          <Text className="text-white px-3">Send</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

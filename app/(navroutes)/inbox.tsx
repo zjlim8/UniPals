@@ -94,7 +94,6 @@ export default function Inbox() {
       const notifData = [];
       for (const notifDoc of notifSnap.docs) {
         const data = notifDoc.data();
-        console.log(data);
         const fromUid = data.from;
         const userDoc = await getDoc(doc(db, "users", fromUid));
         const user = userDoc.data();

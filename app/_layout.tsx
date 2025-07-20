@@ -1,10 +1,10 @@
 import { Stack } from "expo-router";
-import { PaperProvider } from "react-native-paper";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 import "./globals.css";
 
 export default function RootLayout() {
   return (
-    <PaperProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <Stack>
         <Stack.Screen name="(navroutes)" options={{ headerShown: false }} />
         <Stack.Screen name="signup" options={{ headerShown: false }} />
@@ -21,6 +21,6 @@ export default function RootLayout() {
         <Stack.Screen name="friends" options={{ headerShown: false }} />
         <Stack.Screen name="biosetup" options={{ headerShown: false }} />
       </Stack>
-    </PaperProvider>
+    </GestureHandlerRootView>
   );
 }

@@ -1,115 +1,234 @@
 import { db } from "@/firebase";
-import { useNavigation } from "@react-navigation/native";
+import { router } from "expo-router";
 import { getAuth } from "firebase/auth";
+
 import {
   collection,
   doc,
   getDoc,
-  getDocs,
+  limit,
+  onSnapshot,
   orderBy,
   query,
-  serverTimestamp,
-  setDoc,
   where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
+import {
+  ActivityIndicator,
+  FlatList,
+  Image,
+  Keyboard,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import { Searchbar } from "react-native-paper";
 
-const createChatId = (uid1, uid2) => [uid1, uid2].sort().join("_");
+type ChatPreview = {
+  id: string;
+  recipient: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    photoURL?: string;
+  };
+  lastMessage?: string;
+  timestamp: any;
+};
 
-export default function chat() {
-  const [chatPreviews, setChatPreviews] = useState([]);
+export default function Chat() {
+  const [chats, setChats] = useState<ChatPreview[]>([]);
+  const [filteredChats, setFilteredChats] = useState<ChatPreview[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
   const currentUser = getAuth().currentUser;
-  const navigation = useNavigation();
 
   useEffect(() => {
-    const fetchChats = async () => {
-      const q = query(
-        collection(db, "chats"),
-        where("users", "array-contains", currentUser.uid),
-        orderBy("lastTimestamp", "desc")
-      );
-      const snapshot = await getDocs(q);
+    if (!currentUser) return;
 
-      const previewData = [];
+    setLoading(true);
 
-      for (const docSnap of snapshot.docs) {
-        const chat = docSnap.data();
-        const otherUserId = chat.users.find((uid) => uid !== currentUser.uid);
-        const userSnap = await getDoc(doc(db, "users", otherUserId));
-        const user = userSnap.data();
+    const unsubscribeMessagesMap: { [chatId: string]: () => void } = {};
+    let initLoadCount = 0;
+    let totalChats = 0;
 
-        previewData.push({
-          id: docSnap.id,
-          otherUser: { ...user, id: userSnap.id },
-          lastMessage: chat.lastMessage,
-          unread: chat.unreadBy?.includes(currentUser.uid),
+    const unsubscribeFriends = onSnapshot(
+      query(
+        collection(db, "friends"),
+        where("users", "array-contains", currentUser.uid)
+      ),
+      async (friendsSnapshot) => {
+        const chatDocs = friendsSnapshot.docs;
+        totalChats = chatDocs.length;
+
+        if (totalChats === 0) {
+          setChats([]);
+          setFilteredChats([]);
+          setLoading(false);
+          return;
+        }
+
+        chatDocs.forEach(async (docSnapshot) => {
+          const chatId = docSnapshot.id;
+          const otherUserId = docSnapshot
+            .data()
+            .users.find((uid: string) => uid !== currentUser.uid);
+
+          const userDoc = await getDoc(doc(db, "users", otherUserId));
+          const userData = userDoc.data();
+
+          const unsubscribeMessages = onSnapshot(
+            query(
+              collection(db, "chats", chatId, "messages"),
+              orderBy("timestamp", "desc"),
+              limit(1)
+            ),
+            (messagesSnap) => {
+              const lastMessage = messagesSnap.docs[0]?.data();
+
+              setChats((prevChats) => {
+                const updatedChat = {
+                  id: chatId,
+                  recipient: {
+                    id: otherUserId,
+                    firstName: userData?.firstName || "",
+                    lastName: userData?.lastName || "",
+                    photoURL: userData?.photoURL,
+                  },
+                  lastMessage: lastMessage?.text
+                    ? `${
+                        lastMessage.senderId === currentUser.uid ? "You: " : ""
+                      }${lastMessage.text}`
+                    : "No messages yet",
+                  timestamp:
+                    lastMessage?.timestamp || docSnapshot.data().timestamp,
+                };
+
+                const others = prevChats.filter((c) => c.id !== chatId);
+                const sorted = [...others, updatedChat].sort(
+                  (a, b) => b.timestamp?.seconds - a.timestamp?.seconds
+                );
+
+                return sorted;
+              });
+
+              // Once first message snapshot is processed, count it
+              initLoadCount++;
+              if (initLoadCount === totalChats) {
+                setLoading(false);
+              }
+            }
+          );
+
+          unsubscribeMessagesMap[chatId] = unsubscribeMessages;
         });
       }
+    );
 
-      setChatPreviews(previewData);
+    return () => {
+      unsubscribeFriends();
+      Object.values(unsubscribeMessagesMap).forEach((unsub) => unsub());
     };
+  }, [currentUser]);
 
-    fetchChats();
-  }, []);
-
-  const handleStartChat = async (recipient) => {
-    const chatId = createChatId(currentUser.uid, recipient.id);
-    const chatRef = doc(db, "chats", chatId);
-    const chatSnap = await getDoc(chatRef);
-
-    if (!chatSnap.exists()) {
-      await setDoc(chatRef, {
-        users: [currentUser.uid, recipient.id],
-        lastMessage: "",
-        lastTimestamp: serverTimestamp(),
-        unreadBy: [],
-      });
+  useEffect(() => {
+    if (searchQuery.trim() === "") {
+      setFilteredChats(chats);
+      return;
     }
 
-    navigation.navigate("chatscreen", {
-      chatId,
-      recipient,
+    const searchTerm = searchQuery.toLowerCase();
+    const filtered = chats.filter(
+      (chat) =>
+        chat.recipient.firstName.toLowerCase().includes(searchTerm) ||
+        chat.recipient.lastName.toLowerCase().includes(searchTerm)
+    );
+    setFilteredChats(filtered);
+  }, [searchQuery, chats]);
+
+  const handleChatPress = (chat: ChatPreview) => {
+    router.push({
+      pathname: "/chatscreen",
+      params: {
+        chatId: chat.id,
+        recipient: JSON.stringify(chat.recipient),
+      },
     });
   };
 
-  const renderItem = ({ item }) => (
-    <TouchableOpacity
-      className="flex-row items-center px-4 py-3 border-b border-gray-200"
-      onPress={() => handleStartChat(item.otherUser)}
-    >
-      <Image
-        source={{
-          uri: item.otherUser.photoURL || "https://i.pravatar.cc/100?img=1",
-        }}
-        className="w-12 h-12 rounded-full mr-3"
-      />
-      <View className="flex-1">
-        <Text className="text-base font-semibold">
-          {item.otherUser.fullName}
-        </Text>
-        <Text className="text-gray-500 text-sm" numberOfLines={1}>
-          {item.lastMessage || "Say hi 👋"}
-        </Text>
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-white">
+        <ActivityIndicator size="large" color="#3B82F6" />
       </View>
-      {item.unread && (
-        <View className="bg-blue-600 rounded-full w-5 h-5 items-center justify-center">
-          <Text className="text-white text-xs">1</Text>
-        </View>
-      )}
-    </TouchableOpacity>
-  );
+    );
+  }
 
   return (
-    <View className="flex-1 bg-white pt-12">
-      <Text className="text-2xl font-bold px-4 pb-2 text-blue-600">
-        Messages
-      </Text>
-      <FlatList
-        data={chatPreviews}
-        keyExtractor={(item) => item.id}
-        renderItem={renderItem}
-      />
+    <View className="flex-1 bg-white pt-[60]">
+      <Text className="text-2xl font-bold px-4 pb-2 text-primary">Chats</Text>
+      {/* Search Bar */}
+      <View className="px-4 mb-2">
+        <Searchbar
+          placeholder="Search chats"
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          style={{
+            backgroundColor: "#FFFFFF",
+            borderWidth: 1,
+            borderRadius: 8,
+            borderColor: "#90A4AE",
+            width: "100%",
+          }}
+          inputStyle={{
+            color: "#5C5C5C",
+          }}
+          placeholderTextColor="#90A4AE"
+          iconColor="#90A4AE"
+          onBlur={Keyboard.dismiss}
+        />
+      </View>
+      {filteredChats.length === 0 ? (
+        <View className="flex-1 justify-center items-center">
+          {searchQuery.trim() !== "" ? (
+            <Text className="text-bodytext text-center">
+              No chats match your search
+            </Text>
+          ) : (
+            <Text className="text-bodytext text-center">
+              No conversations yet.{"\n"}Add friends to start chatting!
+            </Text>
+          )}
+        </View>
+      ) : (
+        <FlatList
+          data={filteredChats}
+          keyExtractor={(item) => item.id}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              onPress={() => handleChatPress(item)}
+              className="flex-row items-center px-4 py-3 border-b border-gray-200"
+            >
+              <Image
+                source={{
+                  uri:
+                    item.recipient.photoURL ||
+                    "https://i.pravatar.cc/100?img=1",
+                }}
+                className="w-12 h-12 rounded-full mr-3"
+              />
+              <View className="flex-1">
+                <Text className="font-semibold text-base">
+                  {item.recipient.firstName} {item.recipient.lastName}
+                </Text>
+                <Text className="text-gray-500 text-sm" numberOfLines={1}>
+                  {item.lastMessage}
+                </Text>
+              </View>
+            </TouchableOpacity>
+          )}
+        />
+      )}
     </View>
   );
 }
