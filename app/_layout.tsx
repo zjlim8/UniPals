@@ -21,6 +21,7 @@ export default function RootLayout() {
         <Stack.Screen name="friends" options={{ headerShown: false }} />
         <Stack.Screen name="biosetup" options={{ headerShown: false }} />
         <Stack.Screen name="editprofile" options={{ headerShown: false }} />
+        <Stack.Screen name="privacysettings" options={{ headerShown: false }} />
       </Stack>
     </GestureHandlerRootView>
   );

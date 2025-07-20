@@ -202,39 +202,6 @@ const PrivacySettings = () => {
             />
           </List.Section>
         </View>
-
-        {/* Communication */}
-        <View className="mb-6">
-          <Text className="text-lg font-semibold mb-3">Communication</Text>
-          <List.Section>
-            <List.Item
-              title="Allow Friend Requests"
-              description="Others can send you friend requests"
-              left={() => <List.Icon icon="account-plus" />}
-              right={() => (
-                <Switch
-                  value={settings.allowFriendRequests}
-                  onValueChange={(value) =>
-                    updateSetting("allowFriendRequests", value)
-                  }
-                />
-              )}
-            />
-            <List.Item
-              title="Show Online Status"
-              description="Others can see when you're online"
-              left={() => <List.Icon icon="circle" />}
-              right={() => (
-                <Switch
-                  value={settings.showOnlineStatus}
-                  onValueChange={(value) =>
-                    updateSetting("showOnlineStatus", value)
-                  }
-                />
-              )}
-            />
-          </List.Section>
-        </View>
       </ScrollView>
 
       <View className="p-4">

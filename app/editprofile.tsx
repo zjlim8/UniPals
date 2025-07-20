@@ -11,26 +11,43 @@ const editprofile = () => {
         <List.Item
           title="Name"
           description="Change your name"
-          left={(props) => <List.Icon {...props} icon="account" />}
+          titleStyle={{ fontWeight: "600" }}
+          left={(props) => (
+            <List.Icon {...props} icon="account" color="#3B82F6" />
+          )}
           onPress={() => router.push("/accountsetup")}
         />
         <List.Item
           title="Course Information"
           description="Change your course information"
-          left={(props) => <List.Icon {...props} icon="school" />}
+          titleStyle={{ fontWeight: "600" }}
+          left={(props) => (
+            <List.Icon {...props} icon="school" color="#3B82F6" />
+          )}
           onPress={() => router.push("/coursesetup")}
         />
         <List.Item
           title="Bio"
           description="Change your bio"
-          left={(props) => <List.Icon {...props} icon="text" />}
+          titleStyle={{ fontWeight: "600" }}
+          left={(props) => <List.Icon {...props} icon="text" color="#3B82F6" />}
           onPress={() => router.push("/biosetup")}
         />
         <List.Item
           title="Interests"
           description="Change your interests"
-          left={(props) => <List.Icon {...props} icon="star" />}
+          titleStyle={{ fontWeight: "600" }}
+          left={(props) => <List.Icon {...props} icon="star" color="#3B82F6" />}
           onPress={() => router.push("/interestsetup")}
+        />
+        <List.Item
+          title="Privacy Settings"
+          description="Control who can see your profile"
+          titleStyle={{ fontWeight: "600" }}
+          left={(props) => (
+            <List.Icon {...props} icon="shield-account" color="#3B82F6" />
+          )}
+          onPress={() => router.push("/privacysettings")}
         />
       </List.Section>
     </View>
