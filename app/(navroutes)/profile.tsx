@@ -7,6 +7,7 @@ import {
   getDoc,
   getDocs,
   query,
+  setDoc,
   where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
@@ -18,7 +19,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Avatar, Chip } from "react-native-paper";
+import { Chip } from "react-native-paper";
+import ProfilePicture from "../profilepicsetup";
 
 type UserProfile = {
   firstName: string;
@@ -27,7 +29,7 @@ type UserProfile = {
   semester: string;
   interests: string[];
   bio: string;
-  avatarUrl: string;
+  photoURL: string;
   privacySettings?: {
     profileVisibility: "public" | "friends" | "private";
     showCourse: boolean;
@@ -49,6 +51,25 @@ const Profile = () => {
 
   const targetUserId = (params.userId as string) || currentUser?.uid;
   const isOwnProfile = targetUserId === currentUser?.uid;
+
+  const handleImageUpload = async (uri: string) => {
+    if (!currentUser || !isOwnProfile) return;
+
+    try {
+      await setDoc(
+        doc(db, "users", currentUser.uid),
+        {
+          photoURL: uri,
+        },
+        { merge: true }
+      );
+
+      // Update local state
+      setProfile((prev) => (prev ? { ...prev, photoURL: uri } : null));
+    } catch (error) {
+      console.error("Error updating profile picture:", error);
+    }
+  };
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -172,9 +193,12 @@ const Profile = () => {
           className="w-full h-full"
         />
         <View className="absolute -bottom-12 left-1/2 -translate-x-[50px]">
-          <Avatar.Image
+          <ProfilePicture
+            imageUri={profile.photoURL}
             size={100}
-            source={{ uri: "https://i.pravatar.cc/300" }}
+            editable={isOwnProfile}
+            userId={currentUser?.uid}
+            onImageUpload={handleImageUpload}
           />
         </View>
       </View>

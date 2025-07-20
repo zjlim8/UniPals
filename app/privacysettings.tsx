@@ -1,10 +1,18 @@
 import DefaultButton from "@/components/DefaultButton";
 import { db } from "@/firebase";
+import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import { ActivityIndicator, Alert, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  ScrollView,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { List, Switch } from "react-native-paper";
 
 type PrivacySettings = {
@@ -95,51 +103,65 @@ const PrivacySettings = () => {
 
   return (
     <View className="flex-1 bg-background pt-[60]">
-      <ScrollView className="flex-1 px-4">
-        <Text className="text-2xl font-bold text-primary mb-4">
-          Privacy Settings
-        </Text>
+      <ScrollView className="flex-1 mx-4 px-4">
+        <View className="flex-row items-center mb-4">
+          <TouchableOpacity onPress={() => router.back()} className="mr-4">
+            <Ionicons name="chevron-back" size={24} color="#323232" />
+          </TouchableOpacity>
+          <Text className="text-3xl font-bold text-primary">
+            Privacy Settings
+          </Text>
+        </View>
 
         {/* Profile Visibility */}
         <View className="mb-6">
-          <Text className="text-lg font-semibold mb-3">Profile Visibility</Text>
+          <Text className="text-xl font-semibold mb-1">Profile Visibility</Text>
           <List.Section>
             <List.Item
               title="Public"
               description="Anyone can view your profile"
-              left={() => <List.Icon icon="earth" />}
+              titleStyle={{ fontWeight: "600", color: "#323232" }}
+              descriptionStyle={{ color: "#5C5C5C" }}
+              left={() => <List.Icon icon="earth" color="#90A4AE" />}
               right={() => (
                 <Switch
                   value={settings.profileVisibility === "public"}
                   onValueChange={() =>
                     updateSetting("profileVisibility", "public")
                   }
+                  color="#3B82F6" // Change this to your desired color
                 />
               )}
             />
             <List.Item
               title="Friends Only"
               description="Only your friends can view your profile"
-              left={() => <List.Icon icon="account-group" />}
+              titleStyle={{ fontWeight: "600", color: "#323232" }}
+              descriptionStyle={{ color: "#5C5C5C" }}
+              left={() => <List.Icon icon="account-group" color="#90A4AE" />}
               right={() => (
                 <Switch
                   value={settings.profileVisibility === "friends"}
                   onValueChange={() =>
                     updateSetting("profileVisibility", "friends")
                   }
+                  color="#3B82F6"
                 />
               )}
             />
             <List.Item
               title="Private"
               description="Only you can view your profile"
-              left={() => <List.Icon icon="lock" />}
+              titleStyle={{ fontWeight: "600", color: "#323232" }}
+              descriptionStyle={{ color: "#5C5C5C" }}
+              left={() => <List.Icon icon="lock" color="#90A4AE" />}
               right={() => (
                 <Switch
                   value={settings.profileVisibility === "private"}
                   onValueChange={() =>
                     updateSetting("profileVisibility", "private")
                   }
+                  color="#3B82F6"
                 />
               )}
             />
@@ -148,55 +170,67 @@ const PrivacySettings = () => {
 
         {/* Profile Information */}
         <View className="mb-6">
-          <Text className="text-lg font-semibold mb-3">
+          <Text className="text-xl font-semibold mb-1">
             Show Profile Information
           </Text>
           <List.Section>
             <List.Item
               title="Course"
               description="Show your course to others"
-              left={() => <List.Icon icon="school" />}
+              titleStyle={{ fontWeight: "600", color: "#323232" }}
+              descriptionStyle={{ color: "#5C5C5C" }}
+              left={() => <List.Icon icon="school" color="#90A4AE" />}
               right={() => (
                 <Switch
                   value={settings.showCourse}
                   onValueChange={(value) => updateSetting("showCourse", value)}
+                  color="#3B82F6"
                 />
               )}
             />
             <List.Item
               title="Semester"
               description="Show your semester to others"
-              left={() => <List.Icon icon="calendar" />}
+              titleStyle={{ fontWeight: "600", color: "#323232" }}
+              descriptionStyle={{ color: "#5C5C5C" }}
+              left={() => <List.Icon icon="calendar" color="#90A4AE" />}
               right={() => (
                 <Switch
                   value={settings.showSemester}
                   onValueChange={(value) =>
                     updateSetting("showSemester", value)
                   }
+                  color="#3B82F6"
                 />
               )}
             />
             <List.Item
               title="Bio"
               description="Show your bio to others"
-              left={() => <List.Icon icon="text" />}
+              titleStyle={{ fontWeight: "600", color: "#323232" }}
+              descriptionStyle={{ color: "#5C5C5C" }}
+              left={() => <List.Icon icon="text" color="#90A4AE" />}
               right={() => (
                 <Switch
                   value={settings.showBio}
                   onValueChange={(value) => updateSetting("showBio", value)}
+                  color="#3B82F6"
                 />
               )}
             />
             <List.Item
               title="Interests"
               description="Show your interests to others"
-              left={() => <List.Icon icon="star" />}
+              titleStyle={{ fontWeight: "600", color: "#323232" }}
+              descriptionStyle={{ color: "#5C5C5C" }}
+              left={() => <List.Icon icon="star" color="#90A4AE" />}
               right={() => (
                 <Switch
                   value={settings.showInterests}
                   onValueChange={(value) =>
                     updateSetting("showInterests", value)
                   }
+                  color="#3B82F6"
                 />
               )}
             />
@@ -204,7 +238,7 @@ const PrivacySettings = () => {
         </View>
       </ScrollView>
 
-      <View className="p-4">
+      <View className="p-4 mb-5 mx-4">
         <DefaultButton
           mode="contained"
           onPress={savePrivacySettings}
