@@ -103,7 +103,10 @@ const Profile = () => {
 
         {/* Action Buttons */}
         <View className="flex-row justify-center gap-4 my-4">
-          <TouchableOpacity className="bg-primary px-6 py-2 rounded-[15]">
+          <TouchableOpacity
+            onPress={() => router.push("/editprofile")}
+            className="bg-primary px-6 py-2 rounded-[15]"
+          >
             <Text className="text-white font-semibold p-1">Edit Profile</Text>
           </TouchableOpacity>
           <TouchableOpacity className="bg-primary px-6 py-2 rounded-[15]">

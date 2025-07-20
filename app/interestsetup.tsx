@@ -3,19 +3,33 @@ import ToggleButton from "@/components/ToggleButton";
 import { images } from "@/constants/images";
 import { auth, db } from "@/firebase";
 import { router } from "expo-router";
-import { collection, doc, getDocs, setDoc } from "firebase/firestore";
-import React, { useEffect } from "react";
-import { Alert, Image, ScrollView, Text, View } from "react-native";
+import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 
 const interestsetup = () => {
-  const [interests, setInterests] = React.useState<any[]>([]);
-  const [selectedInterests, setSelectedInterests] = React.useState<string[]>(
-    []
-  );
+  const [interests, setInterests] = useState<any[]>([]);
+  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isExistingUser, setIsExistingUser] = useState(false);
 
   useEffect(() => {
-    const fetchInterests = async () => {
+    const fetchData = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       try {
+        // Fetch available interests from clubs collection
         const querySnapshot = await getDocs(collection(db, "clubs"));
         const interestList = querySnapshot.docs.map((doc) => ({
           label: doc.data().tag,
@@ -27,11 +41,24 @@ const interestsetup = () => {
           .map((label) => interestList.find((i) => i.label === label))
           .sort((a, b) => (a?.label ?? "").localeCompare(b?.label ?? ""));
         setInterests(uniqueInterests);
+
+        // Load existing user interests
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (userData.interests && userData.interests.length > 0) {
+            setSelectedInterests(userData.interests);
+            setIsExistingUser(true);
+          }
+        }
       } catch (error) {
-        console.error("Failed to fetch interests:", error);
+        console.error("Failed to fetch data:", error);
+      } finally {
+        setLoading(false);
       }
     };
-    fetchInterests();
+
+    fetchData();
   }, []);
 
   const handleToggle = (label: string) => {
@@ -50,7 +77,7 @@ const interestsetup = () => {
     }
 
     try {
-      if (interests.length === 0) {
+      if (selectedInterests.length === 0) {
         Alert.alert("Error", "Please select at least one interest.");
         return;
       }
@@ -62,19 +89,35 @@ const interestsetup = () => {
         },
         { merge: true }
       );
-      Alert.alert("Success", "Interest setup completed!");
-      router.replace("/(navroutes)");
+      Alert.alert("Success", "Interests updated successfully!");
+      if (isExistingUser) {
+        router.back(); // Go back to edit profile
+      } else {
+        router.replace("/(navroutes)"); // Continue to main app for new users
+      }
     } catch (error) {
-      Alert.alert("Error", "Could not set up interests.");
+      Alert.alert("Error", "Could not update interests.");
       return;
     }
   };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#3B82F6" />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 p-[25] bg-background justify-between ">
       <View className="flex-1 gap-5 mt-[80]">
         <Image source={images.interests} />
-        <Text className="headtext text-left">What are your interests?</Text>
+        <Text className="headtext text-left">
+          {isExistingUser
+            ? "Update your interests"
+            : "What are your interests?"}
+        </Text>
         <ScrollView
           className="flex-1 w-full h-full"
           contentContainerStyle={{ paddingBottom: 24 }}
@@ -92,11 +135,8 @@ const interestsetup = () => {
           </View>
         </ScrollView>
       </View>
-      <DefaultButton
-        mode="contained"
-        onPress={handleInterestSetup} // function to handle press button
-      >
-        Done
+      <DefaultButton mode="contained" onPress={handleInterestSetup}>
+        {isExistingUser ? "Update" : "Done"}
       </DefaultButton>
     </View>
   );

@@ -3,9 +3,10 @@ import DefaultDropdown from "@/components/DefaultDropdown";
 import DropdownSearch from "@/components/DropdownSearch";
 import { auth, db } from "@/firebase";
 import { router } from "expo-router";
-import { collection, doc, getDocs, setDoc } from "firebase/firestore";
+import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import React, { useEffect } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Keyboard,
   Text,
@@ -29,22 +30,44 @@ const coursesetup = () => {
   const [course, setCourse] = React.useState<string>();
   const [semester, setSemester] = React.useState<string>();
   const [courses, setCourses] = React.useState<any[]>([]);
+  const [loading, setLoading] = React.useState(true);
+  const [isExistingUser, setIsExistingUser] = React.useState(false);
 
   useEffect(() => {
-    const fetchCourses = async () => {
+    const fetchData = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
       try {
+        // Fetch courses
         const querySnapshot = await getDocs(collection(db, "courses"));
         const courseList = querySnapshot.docs.map((doc) => ({
           label: doc.data().name,
           value: doc.data().code,
         }));
         setCourses(courseList);
+
+        // Load existing user data
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (userData.course || userData.semester) {
+            setCourse(userData.course || undefined);
+            setSemester(userData.semester || undefined);
+            setIsExistingUser(true);
+          }
+        }
       } catch (error) {
-        console.error("Failed to fetch courses:", error);
+        console.error("Error loading data:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
-    fetchCourses();
+    fetchData();
   }, []);
 
   const handleCourseSetup = async () => {
@@ -69,12 +92,24 @@ const coursesetup = () => {
         { merge: true } // Merge to update existing fields without overwriting the entire document
       );
       Alert.alert("Success", "Course setup completed!");
-      router.replace("/interestsetup"); // Redirect to interest setup page
+      if (isExistingUser) {
+        router.back(); // Go back to edit profile
+      } else {
+        router.replace("/interestsetup"); // Continue setup for new users
+      }
     } catch (error) {
       Alert.alert("Error", "Could not set up course.");
       return;
     }
   };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#3B82F6" />
+      </View>
+    );
+  }
 
   return (
     <TouchableWithoutFeedback
@@ -84,10 +119,13 @@ const coursesetup = () => {
     >
       <View className="screen justify-between">
         <View className="gap-2">
-          <Text className="headtext mt-[120]">Which course are you in?</Text>
+          <Text className="headtext mt-[120]">
+            {isExistingUser ? "Update your course" : "Which course are you in?"}
+          </Text>
           <Text className="text-sm text-bodytext">
-            Let us know your course and semester to connect you with the right
-            people!
+            {isExistingUser
+              ? "Update your course information!"
+              : "Let us know your course and semester to connect you with the right people!"}
           </Text>
           <View className="mt-[20] gap-3">
             <DropdownSearch
@@ -110,11 +148,8 @@ const coursesetup = () => {
             />
           </View>
         </View>
-        <DefaultButton
-          mode="contained"
-          onPress={handleCourseSetup} // function to handle press button
-        >
-          Next
+        <DefaultButton mode="contained" onPress={handleCourseSetup}>
+          {isExistingUser ? "Update" : "Next"}
         </DefaultButton>
       </View>
     </TouchableWithoutFeedback>

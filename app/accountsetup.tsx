@@ -2,9 +2,10 @@ import CustomTextInput from "@/components/CustomTextInput";
 import DefaultButton from "@/components/DefaultButton";
 import { auth, db } from "@/firebase";
 import { router } from "expo-router";
-import { doc, setDoc } from "firebase/firestore";
-import React from "react";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import React, { useEffect } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Keyboard,
   Text,
@@ -15,6 +16,36 @@ import {
 const accountsetup = () => {
   const [text, setText] = React.useState("");
   const [lastName, setLastName] = React.useState("");
+  const [loading, setLoading] = React.useState(true);
+  const [isExistingUser, setIsExistingUser] = React.useState(false);
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (userData.firstName || userData.lastName) {
+            setText(userData.firstName || "");
+            setLastName(userData.lastName || "");
+            setIsExistingUser(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, []);
 
   const handleAccountSetup = async () => {
     const user = auth.currentUser;
@@ -30,14 +61,26 @@ const accountsetup = () => {
           firstName: text,
           lastName: lastName,
         },
-        { merge: true } // Merge to update existing fields without overwriting the entire document
+        { merge: true }
       );
       Alert.alert("Success", "Profile updated!");
-      router.replace("/coursesetup"); // Redirect to course setup page
+      if (isExistingUser) {
+        router.back(); // Go back to edit profile
+      } else {
+        router.replace("/coursesetup"); // Continue setup for new users
+      }
     } catch (error) {
       Alert.alert("Error", "Could not save profile.");
     }
   };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#3B82F6" />
+      </View>
+    );
+  }
 
   return (
     <TouchableWithoutFeedback
@@ -47,9 +90,13 @@ const accountsetup = () => {
     >
       <View className="screen justify-between">
         <View className="gap-2">
-          <Text className="headtext mt-[120]">Tell us more about you!</Text>
+          <Text className="headtext mt-[120]">
+            {isExistingUser ? "Change your Name" : "Tell us more about you!"}
+          </Text>
           <Text className="text-sm text-bodytext">
-            Please enter your details to complete your profile
+            {isExistingUser
+              ? "Please enter your preferred name"
+              : "Please enter your details to complete your profile"}
           </Text>
 
           <View className="gap-3">
@@ -67,11 +114,8 @@ const accountsetup = () => {
             </View>
           </View>
         </View>
-        <DefaultButton
-          mode="contained"
-          onPress={handleAccountSetup} // function to handle press button
-        >
-          Next
+        <DefaultButton mode="contained" onPress={handleAccountSetup}>
+          {isExistingUser ? "Update" : "Next"}
         </DefaultButton>
       </View>
     </TouchableWithoutFeedback>

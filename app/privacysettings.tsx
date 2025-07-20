@@ -1,0 +1,253 @@
+import DefaultButton from "@/components/DefaultButton";
+import { db } from "@/firebase";
+import { router } from "expo-router";
+import { getAuth } from "firebase/auth";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
+import { ActivityIndicator, Alert, ScrollView, Text, View } from "react-native";
+import { List, Switch } from "react-native-paper";
+
+type PrivacySettings = {
+  profileVisibility: "public" | "friends" | "private";
+  showCourse: boolean;
+  showSemester: boolean;
+  showBio: boolean;
+  showInterests: boolean;
+  allowFriendRequests: boolean;
+  showOnlineStatus: boolean;
+};
+
+const PrivacySettings = () => {
+  const [settings, setSettings] = useState<PrivacySettings>({
+    profileVisibility: "public",
+    showCourse: true,
+    showSemester: true,
+    showBio: true,
+    showInterests: true,
+    allowFriendRequests: true,
+    showOnlineStatus: true,
+  });
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const currentUser = getAuth().currentUser;
+
+  useEffect(() => {
+    loadPrivacySettings();
+  }, []);
+
+  const loadPrivacySettings = async () => {
+    if (!currentUser) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        if (userData.privacySettings) {
+          setSettings(userData.privacySettings);
+        }
+      }
+    } catch (error) {
+      console.error("Error loading privacy settings:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const savePrivacySettings = async () => {
+    if (!currentUser) {
+      Alert.alert("Error", "No user logged in");
+      return;
+    }
+
+    setSaving(true);
+    try {
+      await setDoc(
+        doc(db, "users", currentUser.uid),
+        {
+          privacySettings: settings,
+        },
+        { merge: true }
+      );
+      Alert.alert("Success", "Privacy settings updated!");
+      router.back();
+    } catch (error) {
+      console.error("Error saving privacy settings:", error);
+      Alert.alert("Error", "Failed to save privacy settings");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const updateSetting = (key: keyof PrivacySettings, value: any) => {
+    setSettings((prev) => ({ ...prev, [key]: value }));
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#3B82F6" />
+      </View>
+    );
+  }
+
+  return (
+    <View className="flex-1 bg-background pt-[60]">
+      <ScrollView className="flex-1 px-4">
+        <Text className="text-2xl font-bold text-primary mb-4">
+          Privacy Settings
+        </Text>
+
+        {/* Profile Visibility */}
+        <View className="mb-6">
+          <Text className="text-lg font-semibold mb-3">Profile Visibility</Text>
+          <List.Section>
+            <List.Item
+              title="Public"
+              description="Anyone can view your profile"
+              left={() => <List.Icon icon="earth" />}
+              right={() => (
+                <Switch
+                  value={settings.profileVisibility === "public"}
+                  onValueChange={() =>
+                    updateSetting("profileVisibility", "public")
+                  }
+                />
+              )}
+            />
+            <List.Item
+              title="Friends Only"
+              description="Only your friends can view your profile"
+              left={() => <List.Icon icon="account-group" />}
+              right={() => (
+                <Switch
+                  value={settings.profileVisibility === "friends"}
+                  onValueChange={() =>
+                    updateSetting("profileVisibility", "friends")
+                  }
+                />
+              )}
+            />
+            <List.Item
+              title="Private"
+              description="Only you can view your profile"
+              left={() => <List.Icon icon="lock" />}
+              right={() => (
+                <Switch
+                  value={settings.profileVisibility === "private"}
+                  onValueChange={() =>
+                    updateSetting("profileVisibility", "private")
+                  }
+                />
+              )}
+            />
+          </List.Section>
+        </View>
+
+        {/* Profile Information */}
+        <View className="mb-6">
+          <Text className="text-lg font-semibold mb-3">
+            Show Profile Information
+          </Text>
+          <List.Section>
+            <List.Item
+              title="Course"
+              description="Show your course to others"
+              left={() => <List.Icon icon="school" />}
+              right={() => (
+                <Switch
+                  value={settings.showCourse}
+                  onValueChange={(value) => updateSetting("showCourse", value)}
+                />
+              )}
+            />
+            <List.Item
+              title="Semester"
+              description="Show your semester to others"
+              left={() => <List.Icon icon="calendar" />}
+              right={() => (
+                <Switch
+                  value={settings.showSemester}
+                  onValueChange={(value) =>
+                    updateSetting("showSemester", value)
+                  }
+                />
+              )}
+            />
+            <List.Item
+              title="Bio"
+              description="Show your bio to others"
+              left={() => <List.Icon icon="text" />}
+              right={() => (
+                <Switch
+                  value={settings.showBio}
+                  onValueChange={(value) => updateSetting("showBio", value)}
+                />
+              )}
+            />
+            <List.Item
+              title="Interests"
+              description="Show your interests to others"
+              left={() => <List.Icon icon="star" />}
+              right={() => (
+                <Switch
+                  value={settings.showInterests}
+                  onValueChange={(value) =>
+                    updateSetting("showInterests", value)
+                  }
+                />
+              )}
+            />
+          </List.Section>
+        </View>
+
+        {/* Communication */}
+        <View className="mb-6">
+          <Text className="text-lg font-semibold mb-3">Communication</Text>
+          <List.Section>
+            <List.Item
+              title="Allow Friend Requests"
+              description="Others can send you friend requests"
+              left={() => <List.Icon icon="account-plus" />}
+              right={() => (
+                <Switch
+                  value={settings.allowFriendRequests}
+                  onValueChange={(value) =>
+                    updateSetting("allowFriendRequests", value)
+                  }
+                />
+              )}
+            />
+            <List.Item
+              title="Show Online Status"
+              description="Others can see when you're online"
+              left={() => <List.Icon icon="circle" />}
+              right={() => (
+                <Switch
+                  value={settings.showOnlineStatus}
+                  onValueChange={(value) =>
+                    updateSetting("showOnlineStatus", value)
+                  }
+                />
+              )}
+            />
+          </List.Section>
+        </View>
+      </ScrollView>
+
+      <View className="p-4">
+        <DefaultButton
+          mode="contained"
+          onPress={savePrivacySettings}
+          loading={saving}
+        >
+          Save Settings
+        </DefaultButton>
+      </View>
+    </View>
+  );
+};
+
+export default PrivacySettings;

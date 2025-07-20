@@ -20,6 +20,7 @@ export default function RootLayout() {
         <Stack.Screen name="chatscreen" options={{ headerShown: false }} />
         <Stack.Screen name="friends" options={{ headerShown: false }} />
         <Stack.Screen name="biosetup" options={{ headerShown: false }} />
+        <Stack.Screen name="editprofile" options={{ headerShown: false }} />
       </Stack>
     </GestureHandlerRootView>
   );

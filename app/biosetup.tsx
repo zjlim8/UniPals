@@ -3,9 +3,10 @@ import { images } from "@/constants/images";
 import { db } from "@/firebase";
 import { router } from "expo-router";
 import { getAuth } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import React, { useState } from "react";
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import React, { useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Image,
   Keyboard,
@@ -17,7 +18,35 @@ import {
 
 const biosetup = () => {
   const [bio, setBio] = useState("");
+  const [loading, setLoading] = useState(true);
+  const [isExistingUser, setIsExistingUser] = useState(false);
   const currentUser = getAuth().currentUser;
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const userDoc = await getDoc(doc(db, "users", currentUser.uid));
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          if (userData.bio) {
+            setBio(userData.bio);
+            setIsExistingUser(true);
+          }
+        }
+      } catch (error) {
+        console.error("Error loading user data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUserData();
+  }, []);
 
   const handleBioSetup = async () => {
     if (!currentUser) {
@@ -33,11 +62,23 @@ const biosetup = () => {
         { merge: true }
       );
       Alert.alert("Success", "Bio updated successfully!");
-      router.replace("/(navroutes)");
+      if (isExistingUser) {
+        router.back(); // Go back to edit profile
+      } else {
+        router.replace("/(navroutes)"); // Continue to main app for new users
+      }
     } catch (error) {
       Alert.alert("Error", "Something went wrong!");
     }
   };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center">
+        <ActivityIndicator size="large" color="#3B82F6" />
+      </View>
+    );
+  }
 
   return (
     <TouchableWithoutFeedback
@@ -51,10 +92,15 @@ const biosetup = () => {
             className="w-[250] h-[220] mb-5 items-center self-center"
             source={images.biosetup}
           />
-          <Text className="headtext mb-[10]">📝 Tell us about yourself!</Text>
+          <Text className="headtext mb-[10]">
+            {isExistingUser
+              ? "📝 Update your bio!"
+              : "📝 Tell us about yourself!"}
+          </Text>
           <Text className="text-base text-bodytext text-justify">
-            This helps others understand who you are and what you're looking for
-            in a friend!
+            {isExistingUser
+              ? "Update your bio to let others know more about you!"
+              : "This helps others understand who you are and what you're looking for in a friend!"}
           </Text>
           <TextInput
             className="bg-white p-4 rounded-xl border border-auxiliary text-base min-h-[150] text-bodytext mt-[25]"
@@ -72,7 +118,7 @@ const biosetup = () => {
         </View>
         <View>
           <DefaultButton mode="contained" onPress={handleBioSetup}>
-            Next
+            {isExistingUser ? "Update" : "Next"}
           </DefaultButton>
         </View>
       </View>
