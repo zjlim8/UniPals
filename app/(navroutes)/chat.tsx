@@ -1,4 +1,4 @@
-import { db } from "@/firebase";
+import { db } from "@/firebaseSetup";
 import { router } from "expo-router";
 import { getAuth } from "firebase/auth";
 

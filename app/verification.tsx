@@ -13,7 +13,7 @@ import {
   TouchableWithoutFeedback,
   View,
 } from "react-native";
-import { auth, db } from "../firebase";
+import { auth, db } from "../firebaseSetup";
 
 const Verification = () => {
   const [email, setEmail] = useState<string | null>(null);

@@ -1,5 +1,5 @@
 import CustomCard from "@/components/CustomCard";
-import { db } from "@/firebase";
+import { db } from "@/firebaseSetup";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useNavigation } from "expo-router";
 import { collection, getDocs } from "firebase/firestore";

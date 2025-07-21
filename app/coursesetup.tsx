@@ -1,7 +1,7 @@
 import DefaultButton from "@/components/DefaultButton";
 import DefaultDropdown from "@/components/DefaultDropdown";
 import DropdownSearch from "@/components/DropdownSearch";
-import { auth, db } from "@/firebase";
+import { auth, db } from "@/firebaseSetup";
 import { router } from "expo-router";
 import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import React, { useEffect } from "react";

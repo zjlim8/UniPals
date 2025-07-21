@@ -7,7 +7,7 @@ import { Alert, Image, Text, View } from "react-native";
 import { PaperProvider, TextInput } from "react-native-paper";
 import CustomTextInput from "../components/CustomTextInput";
 import DefaultButton from "../components/DefaultButton";
-import { auth, db } from "../firebase";
+import { auth, db } from "../firebaseSetup";
 
 const login = () => {
   const [studentID, setStudentID] = React.useState("");
@@ -42,9 +42,9 @@ const login = () => {
         !userDoc.data().firstName ||
         !userDoc.data().lastName
       ) {
-        router.push("/accountsetup");
+        router.replace("/accountsetup");
       } else {
-        router.push("/(navroutes)");
+        router.replace("/(navroutes)");
       }
     } catch (err: any) {
       Alert.alert("Login failed", "Something went wrong.");

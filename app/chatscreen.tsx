@@ -1,4 +1,4 @@
-import { db } from "@/firebase";
+import { db } from "@/firebaseSetup";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
 import { router, useLocalSearchParams } from "expo-router";
 import { getAuth } from "firebase/auth";

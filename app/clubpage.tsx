@@ -1,5 +1,5 @@
 import InterestTag from "@/components/InterestTag";
-import { db } from "@/firebase";
+import { db } from "@/firebaseSetup";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { RouteProp, useRoute } from "@react-navigation/native";
 import { doc, getDoc } from "firebase/firestore";

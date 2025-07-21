@@ -10,7 +10,7 @@ import { Alert, Image, Text, View } from "react-native";
 import { PaperProvider, TextInput } from "react-native-paper";
 import CustomTextInput from "../components/CustomTextInput";
 import DefaultButton from "../components/DefaultButton";
-import { auth } from "../firebase";
+import { auth } from "../firebaseSetup";
 
 const signup = () => {
   const router = useRouter();

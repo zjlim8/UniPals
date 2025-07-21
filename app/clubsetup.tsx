@@ -1,6 +1,6 @@
 import DefaultButton from "@/components/DefaultButton";
 import DefaultMultiSelect from "@/components/DefaultMultiSelect";
-import { auth, db } from "@/firebase";
+import { auth, db } from "@/firebaseSetup";
 import { router } from "expo-router";
 import { collection, doc, getDocs, setDoc } from "firebase/firestore";
 import React, { useEffect } from "react";

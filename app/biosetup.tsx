@@ -1,6 +1,6 @@
 import DefaultButton from "@/components/DefaultButton";
 import { images } from "@/constants/images";
-import { db } from "@/firebase";
+import { db } from "@/firebaseSetup";
 import { router } from "expo-router";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";

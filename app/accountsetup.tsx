@@ -1,6 +1,6 @@
 import CustomTextInput from "@/components/CustomTextInput";
 import DefaultButton from "@/components/DefaultButton";
-import { auth, db } from "@/firebase";
+import { auth, db } from "@/firebaseSetup";
 import { router } from "expo-router";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import React, { useEffect } from "react";

@@ -1,4 +1,4 @@
-import { storage } from "@/firebase";
+import { storage } from "@/firebaseSetup";
 import * as ImageManipulator from "expo-image-manipulator";
 import { getDownloadURL, ref, uploadBytesResumable } from "firebase/storage";
 
