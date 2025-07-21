@@ -2,10 +2,10 @@ import InterestTag from "@/components/InterestTag";
 import { db } from "@/firebaseSetup";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { RouteProp, useRoute } from "@react-navigation/native";
+import { Image } from "expo-image";
 import { doc, getDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-  Image,
   Linking,
   ScrollView,
   Text,
@@ -71,7 +71,7 @@ const clubpage = () => {
           uri: clubImage,
         }}
         className="w-full h-[350]"
-        resizeMode="cover"
+        contentFit="cover"
       />
       <View className="bg-background py-5 flex-1 gap-5 px-[25]">
         <Text className="text-2xl font-bold text-headingtext">{clubName}</Text>

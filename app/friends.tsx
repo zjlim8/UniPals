@@ -1,5 +1,7 @@
 import { db } from "@/firebaseSetup";
+import { navigateToChat } from "@/utils/chat";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { getAuth } from "firebase/auth";
 import {
@@ -12,14 +14,7 @@ import {
   where,
 } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import {
-  Alert,
-  FlatList,
-  Image,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, FlatList, Text, TouchableOpacity, View } from "react-native";
 
 type Friend = {
   id: string;
@@ -46,18 +41,17 @@ const Friends = () => {
     });
   }
 
-  function handleMessage(id: string): void {
-    router.push({
-      pathname: "/chatscreen",
-      params: {
-        chatId: [currentUser?.uid, id].sort().join("_"),
-        recipient: JSON.stringify({
-          id: id,
-          firstName: friends.find((f) => f.id === id)?.firstName,
-          lastName: friends.find((f) => f.id === id)?.lastName,
-          photoURL: friends.find((f) => f.id === id)?.photoURL,
-        }),
-      },
+  function handleMessage(friendId: string): void {
+    if (!currentUser) return;
+
+    const friend = friends.find((f) => f.id === friendId);
+    if (!friend) return;
+
+    navigateToChat(currentUser.uid, {
+      id: friend.id,
+      firstName: friend.firstName,
+      lastName: friend.lastName,
+      photoURL: friend.photoURL,
     });
   }
 
@@ -115,7 +109,7 @@ const Friends = () => {
               item.photoURL ||
               "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg",
           }}
-          className="w-12 h-12 rounded-full mr-3"
+          style={{ width: 48, height: 48, borderRadius: 24, marginRight: 12 }}
         />
         <View className="flex-1">
           <Text className="font-semibold text-base">

@@ -1,5 +1,6 @@
 import { images } from "@/constants/images";
 import { Asset } from "expo-asset";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import {
   createUserWithEmailAndPassword,
@@ -8,7 +9,6 @@ import {
 import React, { useEffect } from "react";
 import {
   Alert,
-  Image,
   Keyboard,
   Text,
   TouchableWithoutFeedback,
@@ -66,7 +66,7 @@ const signup = () => {
             source={images.logoinvis}
             style={{ width: 100, height: 95 }}
             className="mt-[35] mb-[100]"
-            resizeMode="contain"
+            contentFit="contain"
           />
         </View>
         <View className="flex-1 gap-2">

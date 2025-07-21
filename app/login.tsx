@@ -1,11 +1,11 @@
 import { images } from "@/constants/images";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import React from "react";
 import {
   Alert,
-  Image,
   Keyboard,
   Text,
   TouchableOpacity,

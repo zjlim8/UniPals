@@ -1,5 +1,6 @@
 import { db } from "@/firebaseSetup";
 import Ionicons from "@expo/vector-icons/build/Ionicons";
+import { Image } from "expo-image";
 import { router, useLocalSearchParams } from "expo-router";
 import { getAuth } from "firebase/auth";
 import {
@@ -13,7 +14,6 @@ import {
 import React, { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
-  Image,
   KeyboardAvoidingView,
   Platform,
   Text,
@@ -39,7 +39,9 @@ export default function ChatScreen() {
 
   const currentUser = getAuth().currentUser;
   const chatId = params.chatId as string;
-  const recipient = JSON.parse(params.recipient as string);
+  const recipient = JSON.parse(atob(params.recipient as string));
+
+  console.log("Recipient data:", recipient);
 
   useEffect(() => {
     if (!currentUser || !chatId) return;
@@ -103,7 +105,10 @@ export default function ChatScreen() {
               recipient.photoURL ||
               "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg",
           }}
-          className="w-10 h-10 rounded-full mr-3"
+          style={{ width: 40, height: 40, borderRadius: 99, marginRight: 12 }}
+          cachePolicy={"memory-disk"}
+          contentFit="cover"
+          transition={1000}
         />
         <Text className="text-lg font-semibold">
           {recipient.firstName} {recipient.lastName}

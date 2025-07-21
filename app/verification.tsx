@@ -1,13 +1,13 @@
 import DefaultButton from "@/components/DefaultButton";
 import { images } from "@/constants/images";
 import { Asset } from "expo-asset";
+import { Image } from "expo-image";
 import { useRouter } from "expo-router";
 import { reload, signOut } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
   Alert,
-  Image,
   Keyboard,
   Text,
   TouchableWithoutFeedback,

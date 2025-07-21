@@ -2,17 +2,11 @@ import DefaultButton from "@/components/DefaultButton";
 import ToggleButton from "@/components/ToggleButton";
 import { images } from "@/constants/images";
 import { auth, db } from "@/firebaseSetup";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { collection, doc, getDoc, getDocs, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, ScrollView, Text, View } from "react-native";
 
 const interestsetup = () => {
   const [interests, setInterests] = useState<any[]>([]);

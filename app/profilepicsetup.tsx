@@ -1,14 +1,9 @@
 import { uploadProfileImage } from "@/utils/uploadProfilePicture";
 import { MaterialIcons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
-import {
-  ActivityIndicator,
-  Alert,
-  Image,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ActivityIndicator, Alert, TouchableOpacity, View } from "react-native";
 
 interface ProfilePictureProps {
   imageUri?: string;

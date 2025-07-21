@@ -1,8 +1,9 @@
 import DefaultButton from "@/components/DefaultButton";
 import { images } from "@/constants/images";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import React from "react";
-import { Image, Text, View } from "react-native";
+import { Text, View } from "react-native";
 
 const welcome = () => {
   return (

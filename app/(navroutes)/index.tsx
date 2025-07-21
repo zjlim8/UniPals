@@ -1,15 +1,13 @@
 import CustomCard from "@/components/CustomCard";
 import { images } from "@/constants/images";
-import { db } from "@/firebaseSetup";
 import { handleLogout } from "@/utils/auth";
+import { sendFriendRequest } from "@/utils/friendrequest";
+import { Image } from "expo-image";
 import { Link, router } from "expo-router";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { collection, doc, serverTimestamp, setDoc } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import {
-  Alert,
   FlatList,
-  Image,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -44,33 +42,12 @@ export default function Index() {
     return unsubscribe;
   }, []);
 
-  const sendFriendRequest = async (targetUid: string) => {
+  const handleSendFriendRequest = async (targetUid: string) => {
     if (!currentUser) return;
-    try {
-      const requestRef = doc(collection(db, "friend_requests"));
-      await setDoc(requestRef, {
-        sender: currentUser.uid,
-        recipient: targetUid,
-        status: "pending",
-        timestamp: serverTimestamp(),
-      });
 
+    const success = await sendFriendRequest(currentUser.uid, targetUid);
+    if (success) {
       setSentRequests((prev) => [...prev, targetUid]);
-
-      await setDoc(
-        doc(collection(db, "notifications", targetUid, "user_notifications")),
-        {
-          type: "friend_request",
-          from: currentUser.uid,
-          timestamp: serverTimestamp(),
-          seen: false,
-        }
-      );
-
-      Alert.alert("Friend request sent!");
-    } catch (err) {
-      console.error(err);
-      Alert.alert("Failed to send request");
     }
   };
 
@@ -105,7 +82,7 @@ export default function Index() {
               <TouchableOpacity
                 onPress={(e) => {
                   e.stopPropagation();
-                  sendFriendRequest(item.id);
+                  handleSendFriendRequest(item.id);
                 }}
                 disabled={isRequestSent}
                 className={`mt-3 px-4 py-2 rounded-[10] ${
@@ -143,7 +120,7 @@ export default function Index() {
           source={images.logoinvis}
           style={{ width: 100, height: 95 }}
           className="mt-[35] mb-[100]"
-          resizeMode="contain"
+          contentFit="contain"
         />
         <Text>UniPals</Text>
         <TouchableOpacity onPress={handleLogout}>

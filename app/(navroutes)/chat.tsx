@@ -1,7 +1,8 @@
 import { db } from "@/firebaseSetup";
-import { router } from "expo-router";
+import { navigateToChat } from "@/utils/chat";
 import { getAuth } from "firebase/auth";
 
+import { Image } from "expo-image";
 import {
   collection,
   doc,
@@ -16,7 +17,6 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
-  Image,
   Keyboard,
   Text,
   TouchableOpacity,
@@ -147,13 +147,9 @@ export default function Chat() {
   }, [searchQuery, chats]);
 
   const handleChatPress = (chat: ChatPreview) => {
-    router.push({
-      pathname: "/chatscreen",
-      params: {
-        chatId: chat.id,
-        recipient: JSON.stringify(chat.recipient),
-      },
-    });
+    if (currentUser) {
+      navigateToChat(currentUser.uid, chat.recipient);
+    }
   };
 
   if (loading) {
@@ -215,7 +211,12 @@ export default function Chat() {
                     item.recipient.photoURL ||
                     "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg",
                 }}
-                className="w-12 h-12 rounded-full mr-3"
+                style={{
+                  width: 48,
+                  height: 48,
+                  borderRadius: 24,
+                  marginRight: 12,
+                }}
               />
               <View className="flex-1">
                 <Text className="font-semibold text-base">

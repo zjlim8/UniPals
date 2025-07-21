@@ -1,6 +1,7 @@
 import DefaultButton from "@/components/DefaultButton";
 import { images } from "@/constants/images";
 import { db } from "@/firebaseSetup";
+import { Image } from "expo-image";
 import { router } from "expo-router";
 import { getAuth } from "firebase/auth";
 import { doc, getDoc, setDoc } from "firebase/firestore";
@@ -8,7 +9,6 @@ import React, { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
-  Image,
   Keyboard,
   Text,
   TextInput,

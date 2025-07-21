@@ -1,4 +1,6 @@
 import { db } from "@/firebaseSetup";
+import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 import { getAuth } from "firebase/auth";
 import {
   collection,
@@ -17,7 +19,6 @@ import React, { useEffect, useState } from "react";
 import {
   Alert,
   FlatList,
-  Image,
   ScrollView,
   Text,
   TouchableOpacity,
@@ -143,7 +144,8 @@ export default function Inbox() {
       });
 
       // Create friend connections in both directions
-      await setDoc(doc(db, "friends", `${currentUser.uid}_${uid}`), {
+      const friendId = [currentUser.uid, uid].sort().join("_");
+      await setDoc(doc(db, "friends", friendId), {
         users: [currentUser.uid, uid],
         timestamp: serverTimestamp(),
       });
@@ -173,7 +175,9 @@ export default function Inbox() {
       Alert.alert("Error", "No user is logged in.");
       return;
     }
-    await deleteDoc(doc(db, "notifications", currentUser.uid, notifId));
+    await deleteDoc(
+      doc(db, "notifications", currentUser.uid, "user_notifications", notifId)
+    );
     setNotifications((prev) => prev.filter((n) => n.id !== notifId));
   };
 
@@ -212,9 +216,9 @@ export default function Inbox() {
       </View>
       <TouchableOpacity
         onPress={() => handleDeleteNotification(item.id)}
-        className="bg-red-500 px-3 py-1 rounded-full"
+        className="bg-red-500 px-2 py-2 rounded-full"
       >
-        <Text className="text-white text-sm text-center">Delete</Text>
+        <Ionicons name="trash-outline" size={20} color="white" />
       </TouchableOpacity>
     </View>
   );
