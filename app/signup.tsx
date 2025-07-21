@@ -6,8 +6,15 @@ import {
   sendEmailVerification,
 } from "firebase/auth";
 import React, { useEffect } from "react";
-import { Alert, Image, Text, View } from "react-native";
-import { PaperProvider, TextInput } from "react-native-paper";
+import {
+  Alert,
+  Image,
+  Keyboard,
+  Text,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import { TextInput } from "react-native-paper";
 import CustomTextInput from "../components/CustomTextInput";
 import DefaultButton from "../components/DefaultButton";
 import { auth } from "../firebaseSetup";
@@ -52,7 +59,7 @@ const signup = () => {
   }, []);
 
   return (
-    <PaperProvider>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View className="screen justify-between">
         <View className="items-center justify-center">
           <Image
@@ -72,6 +79,10 @@ const signup = () => {
           />
           <CustomTextInput
             label="Password"
+            textContentType="none"
+            autoComplete="off"
+            autoCorrect={false}
+            importantForAutofill="no"
             value={password}
             onChangeText={(password) => setPass(password)}
             secureTextEntry={!showPassword}
@@ -106,7 +117,7 @@ const signup = () => {
           Sign Up
         </DefaultButton>
       </View>
-    </PaperProvider>
+    </TouchableWithoutFeedback>
   );
 };
 

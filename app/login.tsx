@@ -3,8 +3,16 @@ import { useRouter } from "expo-router";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import React from "react";
-import { Alert, Image, Text, View } from "react-native";
-import { PaperProvider, TextInput } from "react-native-paper";
+import {
+  Alert,
+  Image,
+  Keyboard,
+  Text,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import { TextInput } from "react-native-paper";
 import CustomTextInput from "../components/CustomTextInput";
 import DefaultButton from "../components/DefaultButton";
 import { auth, db } from "../firebaseSetup";
@@ -52,7 +60,7 @@ const login = () => {
   };
 
   return (
-    <PaperProvider>
+    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
       <View className="screen justify-between">
         <View className="items-center justify-center">
           <Image
@@ -83,6 +91,15 @@ const login = () => {
               />
             }
           />
+          <View className="flex-row items-center mt-4 text-bodytext">
+            <Text>Don't have an account? </Text>
+            <TouchableOpacity
+              className="underline text-auxiliary"
+              onPress={() => router.push("/signup")}
+            >
+              <Text className="text-auxiliary underline">Sign up here</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         <DefaultButton
           mode="contained"
@@ -92,7 +109,7 @@ const login = () => {
           Next
         </DefaultButton>
       </View>
-    </PaperProvider>
+    </TouchableWithoutFeedback>
   );
 };
 

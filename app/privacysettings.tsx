@@ -21,8 +21,6 @@ type PrivacySettings = {
   showSemester: boolean;
   showBio: boolean;
   showInterests: boolean;
-  allowFriendRequests: boolean;
-  showOnlineStatus: boolean;
 };
 
 const PrivacySettings = () => {
@@ -32,8 +30,6 @@ const PrivacySettings = () => {
     showSemester: true,
     showBio: true,
     showInterests: true,
-    allowFriendRequests: true,
-    showOnlineStatus: true,
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
