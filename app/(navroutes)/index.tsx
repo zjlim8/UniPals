@@ -315,8 +315,6 @@ export default function Index() {
   };
 
   const renderItem = ({ item }: { item: User }) => {
-    console.log("Recommendations count:", recommendations.length);
-
     const isRequestSent = sentRequests.includes(item.id);
 
     const handleViewProfile = (userId: string) => {
