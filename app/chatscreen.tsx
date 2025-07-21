@@ -99,7 +99,9 @@ export default function ChatScreen() {
         </TouchableOpacity>
         <Image
           source={{
-            uri: recipient.photoURL || "https://i.pravatar.cc/100?img=1",
+            uri:
+              recipient.photoURL ||
+              "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg",
           }}
           className="w-10 h-10 rounded-full mr-3"
         />

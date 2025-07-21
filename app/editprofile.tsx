@@ -11,7 +11,7 @@ const editprofile = () => {
         <TouchableOpacity onPress={() => router.back()} className="mr-4">
           <Ionicons name="chevron-back" size={24} color="#3B82F6" />
         </TouchableOpacity>
-        <Text className="headtext">Edit Profile</Text>
+        <Text className="headtext text-2xl">Edit Profile</Text>
       </View>
       <List.Section>
         <List.Item

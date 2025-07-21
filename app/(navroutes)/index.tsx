@@ -132,29 +132,49 @@ export default function Index() {
   const renderItem = ({ item }: { item: User }) => {
     const isRequestSent = sentRequests.includes(item.id);
 
+    const handleViewProfile = (userId: string) => {
+      router.push({
+        pathname: "/profile",
+        params: {
+          userId: userId,
+        },
+      });
+    };
+
     return (
       <View className="flex-row items-center px-4 py-3 border-b border-gray-100">
-        <CustomCard
-          imageUrl={item.photoURL || "https://i.pravatar.cc/100?img=8"}
-          title={`${item.firstName} ${item.lastName}`}
-          description={`${item.course || "Unknown course"} — ${
-            item.semester ? `Semester ${item.semester}` : "Semester N/A"
-          }`}
-          button={
-            <TouchableOpacity
-              onPress={() => sendFriendRequest(item.id)}
-              disabled={isRequestSent}
-              className={`mt-3 px-4 py-2 rounded-[10] ${
-                isRequestSent ? "bg-gray-400" : "bg-primary"
-              }`}
-            >
-              <Text className="text-white text-sm font-medium text-center">
-                {isRequestSent ? "Sent" : "Add Friend"}
-              </Text>
-            </TouchableOpacity>
-          }
-          cardWidth={240}
-        />
+        <TouchableOpacity
+          onPress={() => handleViewProfile(item.id)}
+          activeOpacity={0.8}
+        >
+          <CustomCard
+            imageUrl={
+              item.photoURL ||
+              "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg"
+            }
+            title={`${item.firstName} ${item.lastName}`}
+            description={`${item.course || "Unknown course"} — ${
+              item.semester ? `Semester ${item.semester}` : "Semester N/A"
+            }`}
+            button={
+              <TouchableOpacity
+                onPress={(e) => {
+                  e.stopPropagation(); // Prevent triggering the parent TouchableOpacity
+                  sendFriendRequest(item.id);
+                }}
+                disabled={isRequestSent}
+                className={`mt-3 px-4 py-2 rounded-[10] ${
+                  isRequestSent ? "bg-gray-400" : "bg-primary"
+                }`}
+              >
+                <Text className="text-white text-sm font-medium text-center">
+                  {isRequestSent ? "Sent" : "Add Friend"}
+                </Text>
+              </TouchableOpacity>
+            }
+            cardWidth={240}
+          />
+        </TouchableOpacity>
       </View>
     );
   };

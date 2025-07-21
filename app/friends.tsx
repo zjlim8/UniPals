@@ -110,7 +110,11 @@ const Friends = () => {
         onPress={() => handleViewProfile(item.id)}
       >
         <Image
-          source={{ uri: item.photoURL || "https://i.pravatar.cc/100?img=1" }}
+          source={{
+            uri:
+              item.photoURL ||
+              "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg",
+          }}
           className="w-12 h-12 rounded-full mr-3"
         />
         <View className="flex-1">
@@ -149,14 +153,31 @@ const Friends = () => {
     if (!currentUser) return;
 
     try {
-      // Delete the friend connection document
-      const friendDocId = [currentUser.uid, friendId].sort().join("_");
-      await deleteDoc(doc(db, "friends", friendDocId));
+      // Find the friendship document by querying for it
+      const friendsQuery = query(
+        collection(db, "friends"),
+        where("users", "array-contains", currentUser.uid)
+      );
 
-      // Update local state
-      setFriends((prev) => prev.filter((friend) => friend.id !== friendId));
+      const friendsSnapshot = await getDocs(friendsQuery);
 
-      Alert.alert("Success", "Friend removed successfully");
+      // Find the specific friendship document with this friend
+      const friendshipDoc = friendsSnapshot.docs.find((doc) => {
+        const users = doc.data().users;
+        return users.includes(friendId);
+      });
+
+      if (friendshipDoc) {
+        // Delete the found document
+        await deleteDoc(doc(db, "friends", friendshipDoc.id));
+
+        // Update local state
+        setFriends((prev) => prev.filter((friend) => friend.id !== friendId));
+
+        Alert.alert("Success", "Friend removed successfully");
+      } else {
+        Alert.alert("Error", "Friendship not found");
+      }
     } catch (error) {
       console.error("Error removing friend:", error);
       Alert.alert("Error", "Failed to remove friend");

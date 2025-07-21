@@ -166,7 +166,9 @@ const ProfilePicture: React.FC<ProfilePictureProps> = ({
     >
       <Image
         source={{
-          uri: imageUri || "https://i.pravatar.cc/300",
+          uri:
+            imageUri ||
+            "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg",
         }}
         style={{
           width: size,

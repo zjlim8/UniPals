@@ -81,7 +81,9 @@ export default function Inbox() {
             lastName: user.lastName,
             course: user.course || "",
             semester: user.semester || "",
-            avatar: user.photoURL || "https://i.pravatar.cc/100?img=1",
+            avatar:
+              user.photoURL ||
+              "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg",
           });
         }
       }
@@ -101,7 +103,9 @@ export default function Inbox() {
           notifData.push({
             id: notifDoc.id,
             name: `${user.firstName} ${user.lastName}`,
-            avatar: user.photoURL || "https://i.pravatar.cc/100?img=5",
+            avatar:
+              user.photoURL ||
+              "https://static.vecteezy.com/system/resources/thumbnails/020/765/399/small_2x/default-profile-account-unknown-icon-black-silhouette-free-vector.jpg",
             type: data.type,
           });
         }

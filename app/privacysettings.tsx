@@ -108,7 +108,7 @@ const PrivacySettings = () => {
           <TouchableOpacity onPress={() => router.back()} className="mr-4">
             <Ionicons name="chevron-back" size={24} color="#323232" />
           </TouchableOpacity>
-          <Text className="text-3xl font-bold text-primary">
+          <Text className="text-2xl font-bold text-primary">
             Privacy Settings
           </Text>
         </View>
