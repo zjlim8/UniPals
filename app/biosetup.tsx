@@ -65,7 +65,7 @@ const biosetup = () => {
       if (isExistingUser) {
         router.back(); // Go back to edit profile
       } else {
-        router.replace("/(navroutes)"); // Continue to main app for new users
+        router.replace("/interestsetup"); // Continue to main app for new users
       }
     } catch (error) {
       Alert.alert("Error", "Something went wrong!");

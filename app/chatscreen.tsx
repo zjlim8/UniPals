@@ -41,8 +41,6 @@ export default function ChatScreen() {
   const chatId = params.chatId as string;
   const recipient = JSON.parse(atob(params.recipient as string));
 
-  console.log("Recipient data:", recipient);
-
   useEffect(() => {
     if (!currentUser || !chatId) return;
 

@@ -87,7 +87,7 @@ const interestsetup = () => {
       if (isExistingUser) {
         router.back(); // Go back to edit profile
       } else {
-        router.replace("/(navroutes)"); // Continue to main app for new users
+        router.replace("/welcome"); // Continue setup for new users
       }
     } catch (error) {
       Alert.alert("Error", "Could not update interests.");

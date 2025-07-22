@@ -42,9 +42,15 @@ const signup = () => {
         password
       );
 
-      Alert.alert("Success", "Account created!");
+      Alert.alert("Success", "Account created!", [
+        {
+          text: "OK",
+          onPress: () => {
+            router.push("/verification"); // Redirect user to verification page
+          },
+        },
+      ]);
       await sendEmailVerification(userCredential.user);
-      router.push("/verification"); // Redirect user to verification page
     } catch (error) {
       if (error instanceof Error) {
         Alert.alert("Registration Error", error.message);

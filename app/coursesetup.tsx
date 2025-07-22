@@ -95,7 +95,7 @@ const coursesetup = () => {
       if (isExistingUser) {
         router.back(); // Go back to edit profile
       } else {
-        router.replace("/interestsetup"); // Continue setup for new users
+        router.replace("/biosetup"); // Continue setup for new users
       }
     } catch (error) {
       Alert.alert("Error", "Could not set up course.");
