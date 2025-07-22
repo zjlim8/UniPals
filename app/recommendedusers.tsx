@@ -1,4 +1,5 @@
 import { functions } from "@/firebaseSetup";
+import { useFocusEffect } from "@react-navigation/native";
 import { getAuth } from "firebase/auth";
 import { httpsCallable } from "firebase/functions";
 import { useCallback, useEffect, useState } from "react";
@@ -23,53 +24,58 @@ export const useRecommendedFriends = () => {
   const [refreshing, setRefreshing] = useState(false);
   const currentUser = getAuth().currentUser;
 
-  const fetchRecommendations = async (isRefreshing = false) => {
-    if (!currentUser) {
-      setLoading(false);
-      return;
-    }
+  const fetchRecommendations = useCallback(
+    async (isRefreshing = false) => {
+      if (!currentUser) {
+        setLoading(false);
+        return;
+      }
 
-    try {
-      if (!isRefreshing) setLoading(true);
+      try {
+        if (!isRefreshing) setLoading(true);
 
-      const getRecommendedFriends = httpsCallable(
-        functions,
-        "getRecommendedFriends"
-      );
-      const result = await getRecommendedFriends();
+        const getRecommendedFriends = httpsCallable(
+          functions,
+          "getRecommendedFriends"
+        );
+        const result = await getRecommendedFriends();
 
-      // Transform data to match your existing User interface
-      const transformedData = (result.data as any[]).map((user) => ({
-        ...user,
-        id: user.uid, // Add id property for compatibility
-      }));
+        const transformedData = (result.data as any[]).map((user) => ({
+          ...user,
+          id: user.uid,
+        }));
 
-      setRecommendations(transformedData);
-    } catch (error) {
-      console.error("Error fetching recommendations:", error);
-      Alert.alert("Error", "Failed to fetch friend recommendations");
-    } finally {
-      setLoading(false);
-      if (isRefreshing) setRefreshing(false);
-    }
-  };
-
-  const onRefresh = useCallback(() => {
-    setRefreshing(true);
-    fetchRecommendations(true);
-  }, []);
+        setRecommendations(transformedData);
+      } catch (error) {
+        console.error("Error fetching recommendations:", error);
+        Alert.alert("Error", "Failed to fetch friend recommendations");
+      } finally {
+        setLoading(false);
+        if (isRefreshing) setRefreshing(false);
+      }
+    },
+    [currentUser]
+  );
 
   useEffect(() => {
     if (currentUser) {
       fetchRecommendations();
     }
-  }, [currentUser]);
+  }, [currentUser, fetchRecommendations]);
+
+  // THIS IS THE MAGIC LINE - refreshes when you return to index
+  useFocusEffect(
+    useCallback(() => {
+      if (currentUser && !loading) {
+        fetchRecommendations(true);
+      }
+    }, [currentUser, loading, fetchRecommendations])
+  );
 
   return {
     recommendations,
     loading,
     refreshing,
-    onRefresh,
     fetchRecommendations,
   };
 };

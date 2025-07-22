@@ -3,7 +3,7 @@ import { db } from "@/firebaseSetup";
 import { navigateToChat } from "@/utils/chat";
 import { sendFriendRequest } from "@/utils/friendrequest";
 import { Image } from "expo-image";
-import { router, useLocalSearchParams } from "expo-router";
+import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
 import { getAuth } from "firebase/auth";
 import {
   collection,
@@ -16,7 +16,7 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import {
   FlatList,
   ScrollView,
@@ -67,6 +67,8 @@ const Profile = () => {
 
   const targetUserId = (params.userId as string) || currentUser?.uid;
   const isOwnProfile = targetUserId === currentUser?.uid;
+
+  const [transitioning, setTransitioning] = useState(false);
 
   const handleSendFriendRequest = async () => {
     if (!currentUser || !targetUserId) return;
@@ -196,75 +198,169 @@ const Profile = () => {
     );
   };
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        if (!targetUserId) {
+  const fetchProfile = useCallback(async () => {
+    try {
+      if (!targetUserId) {
+        setLoading(false);
+        setTransitioning(false);
+        return;
+      }
+
+      const userDoc = await getDoc(doc(db, "users", targetUserId));
+      if (userDoc.exists()) {
+        const userData = userDoc.data() as UserProfile;
+        setProfile(userData);
+
+        // Check if viewing own profile
+        if (isOwnProfile) {
+          setCanViewProfile(true);
+          // Fetch recent friends only for own profile
+          await fetchRecentFriends();
           setLoading(false);
+          setTransitioning(false);
           return;
         }
 
-        const userDoc = await getDoc(doc(db, "users", targetUserId));
-        if (userDoc.exists()) {
-          const userData = userDoc.data() as UserProfile;
-          setProfile(userData);
+        // Check friendship status
+        if (currentUser) {
+          const friendshipQuery = query(
+            collection(db, "friends"),
+            where("users", "array-contains", currentUser.uid)
+          );
+          const friendshipSnapshot = await getDocs(friendshipQuery);
+          const isFriendResult = friendshipSnapshot.docs.some((doc) =>
+            doc.data().users.includes(targetUserId)
+          );
+          setIsFriend(isFriendResult);
 
-          // Check if viewing own profile
-          if (isOwnProfile) {
-            setCanViewProfile(true);
-            // Fetch recent friends only for own profile
-            await fetchRecentFriends();
-            setLoading(false);
-            return;
+          // Check privacy settings
+          const privacySettings = userData.privacySettings || {
+            profileVisibility: "public",
+            showCourse: true,
+            showSemester: true,
+            showBio: true,
+            showInterests: true,
+          };
+
+          let canView = false;
+          switch (privacySettings.profileVisibility) {
+            case "public":
+              canView = true;
+              break;
+            case "friends":
+              canView = isFriendResult;
+              break;
+            case "private":
+              canView = false;
+              break;
+            default:
+              canView = true;
           }
-
-          // Check friendship status
-          if (currentUser) {
-            const friendshipQuery = query(
-              collection(db, "friends"),
-              where("users", "array-contains", currentUser.uid)
-            );
-            const friendshipSnapshot = await getDocs(friendshipQuery);
-            const isFriendResult = friendshipSnapshot.docs.some((doc) =>
-              doc.data().users.includes(targetUserId)
-            );
-            setIsFriend(isFriendResult);
-
-            // Check privacy settings
-            const privacySettings = userData.privacySettings || {
-              profileVisibility: "public",
-              showCourse: true,
-              showSemester: true,
-              showBio: true,
-              showInterests: true,
-            };
-
-            let canView = false;
-            switch (privacySettings.profileVisibility) {
-              case "public":
-                canView = true;
-                break;
-              case "friends":
-                canView = isFriendResult;
-                break;
-              case "private":
-                canView = false;
-                break;
-              default:
-                canView = true;
-            }
-            setCanViewProfile(canView);
-          }
+          setCanViewProfile(canView);
         }
-      } catch (error) {
-        console.error("Error fetching profile:", error);
-      } finally {
-        setLoading(false);
       }
-    };
+    } catch (error) {
+      console.error("Error fetching profile:", error);
+    } finally {
+      setLoading(false);
+      setTransitioning(false);
+    }
+  }, [targetUserId, isOwnProfile, currentUser]);
 
+  useEffect(() => {
+    setTransitioning(true);
+    setProfile(null);
+    setLoading(true);
+    setCanViewProfile(false);
+    setIsFriend(false);
+    setRecentFriends([]);
+    setRequestSent(false);
+  }, [params.userId]);
+
+  useEffect(() => {
     fetchProfile();
-  }, [params.userId, currentUser, targetUserId, isOwnProfile]);
+  }, [fetchProfile]);
+
+  useFocusEffect(
+    useCallback(() => {
+      // Only refresh if this is the user's own profile
+      if (isOwnProfile && !loading) {
+        fetchProfile();
+      }
+    }, [isOwnProfile, loading, fetchProfile])
+  );
+
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     try {
+  //       if (!targetUserId) {
+  //         setLoading(false);
+  //         setTransitioning(false);
+  //         return;
+  //       }
+
+  //       const userDoc = await getDoc(doc(db, "users", targetUserId));
+  //       if (userDoc.exists()) {
+  //         const userData = userDoc.data() as UserProfile;
+  //         setProfile(userData);
+
+  //         // Check if viewing own profile
+  //         if (isOwnProfile) {
+  //           setCanViewProfile(true);
+  //           // Fetch recent friends only for own profile
+  //           await fetchRecentFriends();
+  //           setLoading(false);
+  //           return;
+  //         }
+
+  //         // Check friendship status
+  //         if (currentUser) {
+  //           const friendshipQuery = query(
+  //             collection(db, "friends"),
+  //             where("users", "array-contains", currentUser.uid)
+  //           );
+  //           const friendshipSnapshot = await getDocs(friendshipQuery);
+  //           const isFriendResult = friendshipSnapshot.docs.some((doc) =>
+  //             doc.data().users.includes(targetUserId)
+  //           );
+  //           setIsFriend(isFriendResult);
+
+  //           // Check privacy settings
+  //           const privacySettings = userData.privacySettings || {
+  //             profileVisibility: "public",
+  //             showCourse: true,
+  //             showSemester: true,
+  //             showBio: true,
+  //             showInterests: true,
+  //           };
+
+  //           let canView = false;
+  //           switch (privacySettings.profileVisibility) {
+  //             case "public":
+  //               canView = true;
+  //               break;
+  //             case "friends":
+  //               canView = isFriendResult;
+  //               break;
+  //             case "private":
+  //               canView = false;
+  //               break;
+  //             default:
+  //               canView = true;
+  //           }
+  //           setCanViewProfile(canView);
+  //         }
+  //       }
+  //     } catch (error) {
+  //       console.error("Error fetching profile:", error);
+  //     } finally {
+  //       setLoading(false);
+  //       setTransitioning(false);
+  //     }
+  //   };
+
+  //   fetchProfile();
+  // }, [params.userId, currentUser, targetUserId, isOwnProfile]);
 
   if (loading) {
     return (

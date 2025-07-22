@@ -65,8 +65,12 @@ const login = () => {
         <View className="items-center justify-center">
           <Image
             source={images.logoinvis}
-            style={{ width: 100, height: 95 }}
-            className="mt-[35] mb-[100]"
+            style={{
+              width: 100,
+              height: 95,
+              marginTop: 35,
+              marginBottom: 100,
+            }}
           />
         </View>
         <View className="flex-1 gap-2">

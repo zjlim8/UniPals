@@ -1,8 +1,8 @@
 import { icons } from "@/constants/icons";
-import { Image } from "expo-image";
 import { router, Tabs } from "expo-router";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import React, { useEffect, useState } from "react";
+import { Image } from "react-native";
 
 const NavIcons = ({ focused, icon, title }: any) => {
   return (

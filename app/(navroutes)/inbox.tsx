@@ -185,7 +185,7 @@ export default function Inbox() {
     <View className="flex-row items-center px-4 py-3 border-b border-gray-200">
       <Image
         source={{ uri: item.avatar }}
-        className="w-12 h-12 rounded-full mr-3"
+        style={{ width: 48, height: 48, borderRadius: 99, marginRight: 12 }}
       />
       <View className="flex-1">
         <Text className="font-semibold text-base">
@@ -206,7 +206,7 @@ export default function Inbox() {
     <View className="flex-row items-center px-4 py-3 border-b border-gray-200">
       <Image
         source={{ uri: item.avatar }}
-        className="w-12 h-12 rounded-full mr-3"
+        style={{ width: 48, height: 48, borderRadius: 99, marginRight: 12 }}
       />
       <View className="flex-1">
         <Text className="font-semibold text-base">{item.name}</Text>

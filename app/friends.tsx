@@ -1,6 +1,6 @@
 import { db } from "@/firebaseSetup";
 import { navigateToChat } from "@/utils/chat";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { Image } from "expo-image";
 import { router } from "expo-router";
 import { getAuth } from "firebase/auth";
@@ -180,7 +180,12 @@ const Friends = () => {
 
   return (
     <View className="flex-1 bg-background pt-[60]">
-      <Text className="text-2xl font-bold px-4 pb-2 text-primary">Friends</Text>
+      <View className="flex-row items-center mb-2">
+        <TouchableOpacity onPress={() => router.back()} className="mx-4">
+          <Ionicons name="chevron-back" size={24} color="#3B82F6" />
+        </TouchableOpacity>
+        <Text className="text-2xl font-bold text-headingtext">Friends</Text>
+      </View>
       <FlatList
         data={friends}
         renderItem={renderFriend}
