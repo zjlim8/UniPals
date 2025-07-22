@@ -185,7 +185,7 @@ export default function Index() {
           </TouchableOpacity>
         </View>
         <FlatList
-          data={recommendations}
+          data={recommendations.slice(0, 5)} // Limit to 5 recommendations
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
           contentContainerStyle={{ paddingBottom: 20 }}

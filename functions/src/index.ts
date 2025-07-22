@@ -107,8 +107,7 @@ export const getRecommendedFriends = functions.https.onCall(
             sharedInterests,
           };
         })
-        .sort((a, b) => b.matchScore - a.matchScore)
-        .slice(0, 5);
+        .sort((a, b) => b.matchScore - a.matchScore);
 
       return recommendations;
     } catch (error) {

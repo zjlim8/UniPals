@@ -9,7 +9,15 @@ const welcome = () => {
   return (
     <View className="screen justify-between ">
       <View className="gap-5 mt-[120]">
-        <Image source={images.welcome} />
+        <Image
+          source={images.welcome}
+          style={{
+            width: 250,
+            height: 220,
+            alignItems: "center",
+            alignSelf: "center",
+          }}
+        />
         <Text className="headtext text-center">Welcome to UniPals!</Text>
         <Text className="text-sm text-bodytext text-center">
           You're all done! You can now start connecting with like-minded

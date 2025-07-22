@@ -91,11 +91,11 @@ const coursesetup = () => {
         },
         { merge: true } // Merge to update existing fields without overwriting the entire document
       );
-      Alert.alert("Success", "Course setup completed!");
       if (isExistingUser) {
+        Alert.alert("Success", "Course information updated!");
         router.back(); // Go back to edit profile
       } else {
-        Alert.alert("Success", "Account created!", [
+        Alert.alert("Success", "Course setup completed!", [
           {
             text: "OK",
             onPress: () => {

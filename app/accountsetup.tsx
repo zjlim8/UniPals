@@ -71,7 +71,7 @@ const accountsetup = () => {
           {
             text: "OK",
             onPress: () => {
-              router.push("/verification"); // Redirect user to verification page
+              router.push("/coursesetup"); // Redirect user to course setup page
             },
           },
         ]);

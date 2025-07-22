@@ -61,11 +61,11 @@ const biosetup = () => {
         },
         { merge: true }
       );
-      Alert.alert("Success", "Bio updated successfully!");
       if (isExistingUser) {
+        Alert.alert("Success", "Bio updated successfully!");
         router.back(); // Go back to edit profile
       } else {
-        Alert.alert("Success", "Account created!", [
+        Alert.alert("Success", "Bio set successfully!", [
           {
             text: "OK",
             onPress: () => {
@@ -97,6 +97,13 @@ const biosetup = () => {
         <View>
           <Image
             className="w-[250] h-[220] mb-5 items-center self-center"
+            style={{
+              width: 250,
+              height: 220,
+              marginBottom: 20,
+              alignItems: "center",
+              alignSelf: "center",
+            }}
             source={images.biosetup}
           />
           <Text className="headtext mb-[10]">

@@ -83,11 +83,11 @@ const interestsetup = () => {
         },
         { merge: true }
       );
-      Alert.alert("Success", "Interests updated successfully!");
       if (isExistingUser) {
+        Alert.alert("Success", "Interests updated successfully!");
         router.back(); // Go back to edit profile
       } else {
-        Alert.alert("Success", "Account created!", [
+        Alert.alert("Success", "Interests set successfully!", [
           {
             text: "OK",
             onPress: () => {
@@ -113,7 +113,15 @@ const interestsetup = () => {
   return (
     <View className="flex-1 p-[25] bg-background justify-between ">
       <View className="flex-1 gap-5 mt-[80]">
-        <Image source={images.interests} />
+        <Image
+          source={images.interests}
+          style={{
+            width: 250,
+            height: 220,
+            alignItems: "center",
+            alignSelf: "center",
+          }}
+        />
         <Text className="headtext text-left">
           {isExistingUser
             ? "Update your interests"
