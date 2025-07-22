@@ -36,7 +36,7 @@ const Clubs = () => {
     fetchClubs();
   }, []);
 
-  // Optional: filter clubs by search query
+  // filter clubs by search query
   const filteredClubs = clubs.filter((club) =>
     club.name.toLowerCase().includes(searchQuery.toLowerCase())
   );

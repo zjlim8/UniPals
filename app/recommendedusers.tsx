@@ -63,7 +63,6 @@ export const useRecommendedFriends = () => {
     }
   }, [currentUser, fetchRecommendations]);
 
-  // THIS IS THE MAGIC LINE - refreshes when you return to index
   useFocusEffect(
     useCallback(() => {
       if (currentUser && !loading) {
