@@ -1,6 +1,7 @@
 import CustomCard from "@/components/CustomCard";
 import { db } from "@/firebaseSetup";
 import { navigateToChat } from "@/utils/chat";
+import { getCourseName } from "@/utils/fetchcourse";
 import { sendFriendRequest } from "@/utils/friendrequest";
 import { Image } from "expo-image";
 import { router, useFocusEffect, useLocalSearchParams } from "expo-router";
@@ -63,6 +64,7 @@ const Profile = () => {
   const [isFriend, setIsFriend] = useState(false);
   const [recentFriends, setRecentFriends] = useState<Friend[]>([]);
   const [requestSent, setRequestSent] = useState(false);
+  const [courseName, setCourseName] = useState<string | null>(null);
   const currentUser = getAuth().currentUser;
 
   const targetUserId = (params.userId as string) || currentUser?.uid;
@@ -210,6 +212,11 @@ const Profile = () => {
       if (userDoc.exists()) {
         const userData = userDoc.data() as UserProfile;
         setProfile(userData);
+
+        if (userData.course) {
+          const fullCourseName = await getCourseName(userData.course);
+          setCourseName(fullCourseName);
+        }
 
         // Check if viewing own profile
         if (isOwnProfile) {
@@ -359,7 +366,7 @@ const Profile = () => {
 
         {(isOwnProfile || privacySettings.showCourse) && (
           <Text className="text-lg text-center text-headingtext mt-1">
-            {profile.course}
+            {courseName || profile.course}
           </Text>
         )}
 
