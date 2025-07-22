@@ -95,7 +95,14 @@ const coursesetup = () => {
       if (isExistingUser) {
         router.back(); // Go back to edit profile
       } else {
-        router.replace("/biosetup"); // Continue setup for new users
+        Alert.alert("Success", "Account created!", [
+          {
+            text: "OK",
+            onPress: () => {
+              router.replace("/biosetup"); // Continue setup for new users
+            },
+          },
+        ]);
       }
     } catch (error) {
       Alert.alert("Error", "Could not set up course.");

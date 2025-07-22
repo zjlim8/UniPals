@@ -65,7 +65,14 @@ const biosetup = () => {
       if (isExistingUser) {
         router.back(); // Go back to edit profile
       } else {
-        router.replace("/interestsetup"); // Continue to main app for new users
+        Alert.alert("Success", "Account created!", [
+          {
+            text: "OK",
+            onPress: () => {
+              router.replace("/interestsetup"); // Continue to main app for new users
+            },
+          },
+        ]);
       }
     } catch (error) {
       Alert.alert("Error", "Something went wrong!");

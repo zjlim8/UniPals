@@ -63,11 +63,18 @@ const accountsetup = () => {
         },
         { merge: true }
       );
-      Alert.alert("Success", "Profile updated!");
       if (isExistingUser) {
+        Alert.alert("Success", "Profile updated!");
         router.back(); // Go back to edit profile
       } else {
-        router.replace("/coursesetup"); // Continue setup for new users
+        Alert.alert("Success", "Account created!", [
+          {
+            text: "OK",
+            onPress: () => {
+              router.push("/verification"); // Redirect user to verification page
+            },
+          },
+        ]);
       }
     } catch (error) {
       Alert.alert("Error", "Could not save profile.");

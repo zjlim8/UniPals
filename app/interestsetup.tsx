@@ -87,7 +87,14 @@ const interestsetup = () => {
       if (isExistingUser) {
         router.back(); // Go back to edit profile
       } else {
-        router.replace("/welcome"); // Continue setup for new users
+        Alert.alert("Success", "Account created!", [
+          {
+            text: "OK",
+            onPress: () => {
+              router.replace("/welcome"); // Continue setup for new users
+            },
+          },
+        ]);
       }
     } catch (error) {
       Alert.alert("Error", "Could not update interests.");
